@@ -31,6 +31,22 @@ function proxi:RecomA()
 	
 end
 
+function proxi:RecomC()
+	self.dat.view_data.pos_func = function()
+		local dist = self.dat.view_data.radius_const / math.tan( math.rad( self.dat.view_data.fov_const / 2 ) )
+		return EyePos() - self.dat.view_data.ang_func():Forward() * dist
+		
+	end
+	self.dat.view_data.ang_func = function() return Angle( 35, EyeAngles().y, 0 ) end
+	self.dat.view_data.radius_const = 512
+	self.dat.view_data.fov_const = 100
+	self.dat.view_data.drawx = 12
+	self.dat.view_data.drawy = 256
+	self.dat.view_data.draww = 312
+	self.dat.view_data.drawh = 312
+	
+end
+
 function proxi:RecomB()
 	self.dat.view_data.pos_func = function()
 				return EyePos()
@@ -49,7 +65,7 @@ end
 function proxi:DoRenderVirtualScene()
 	if not self.dat.view_data then
 		self.dat.view_data = {}
-		proxi:RecomA()
+		proxi:RecomC()
 	end
 	
 	self.dat.view_data.raw_scrw = ScrW()
@@ -58,15 +74,41 @@ function proxi:DoRenderVirtualScene()
 	local xDraw, yDraw = self.dat.view_data.drawx, self.dat.view_data.drawy
 	local iWidth, iHeight = self.dat.view_data.draww, self.dat.view_data.drawh
 	
+	--surface.SetDrawColor( 0, 0, 0, 128 )
+	--surface.DrawRect( xDraw, yDraw, iWidth, iHeight )
+	
+	render.ClearStencil()
+	render.SetStencilEnable( true )
+	render.SetStencilFailOperation( STENCILOPERATION_KEEP )
+	render.SetStencilPassOperation( STENCILOPERATION_REPLACE )
+	render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_ALWAYS )
+	render.SetStencilReferenceValue( 1 )
+	
 	surface.SetDrawColor( 0, 0, 0, 128 )
-	surface.DrawRect( xDraw, yDraw, iWidth, iHeight )
+	surface.DrawPoly( self:CalcCircle( 36, iWidth / 2, self.dat.view_data.drawx, self.dat.view_data.drawy ) )
+	
+	
+	render.SetStencilPassOperation( STENCILOPERATION_KEEP )
+	
+	local matfix = 1.07
+	local iSurfWidth, iSurfHeight = iWidth * matfix, iHeight * matfix
+	local iDrawXCenter, iDrawYCenter = xDraw + iWidth / 2, yDraw + iHeight / 2
+	surface.SetDrawColor( 255, 255, 255, 255 )
+	surface.SetTexture( surface.GetTextureID( "proxi/rad_ring.vmt" ) )
+	surface.DrawTexturedRectRotated( iDrawXCenter, iDrawYCenter, iSurfWidth, iSurfHeight, 0)
+	surface.SetTexture( nil )
+	
+	render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_EQUAL )
+	render.SetStencilPassOperation( STENCILOPERATION_REPLACE )
 	
 	cam.Start3D( self.dat.view_data.pos_func(), self.dat.view_data.ang_func(), self.dat.view_data.fov_const, xDraw, yDraw, iWidth, iHeight )
-		local bOkay, sError = pcall( self.DoCameraVirtualScene, self, iWidth, iHeight )
+		local bOkay, strErr = pcall( self.DoCameraVirtualScene, self, iWidth, iHeight )
 		
 	cam.End3D()
 	
-	if not bOkay then ErrorNoHalt( ">> Proxi ERROR : " ..sError .." ..!" ) end
+	if not bOkay then ErrorNoHalt( ">> Proxi ERROR : " .. strErr ) end
+	
+	render.SetStencilEnable( false )
 	
 	--draw.SimpleText( "LOL", "ScoreboardText", 20, 20, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 end
@@ -81,11 +123,44 @@ function proxi:ConvertToScreen( vPos, iWidth, iHeight )
 end
 
 local PROXI_CAMERA_FIX = 1
+local PROXI_CIRCLE_POLYGON = {}
+local PROXI_CIRCLE_RES = -1
+local PROXI_CIRCLE_RADIUS = -1
+local PROXI_CIRCLE_IDX = -1
+local PROXI_CIRCLE_IDY = -1
+
+function proxi:CalcCircle( iRes, iRadius, iDrawX, iDrawY, optiRadiusHeight )
+	if PROXI_CIRCLE_RES == iRes and PROXI_CIRCLE_RADIUS == radius and PROXI_CIRCLE_IDX ~= iDrawX and PROXI_CIRCLE_IDY ~= iDrawY then return PROXI_CIRCLE_POLYGON end
+	
+	PROXI_CIRCLE_RES = iRes
+	PROXI_CIRCLE_RADIUS = iRadius
+	PROXI_CIRCLE_IDX = iDrawX
+	PROXI_CIRCLE_IDY = iDrawY
+	
+	for i = 1, iRes do
+		if not PROXI_CIRCLE_POLYGON[i] then
+			PROXI_CIRCLE_POLYGON[i] = {}
+			
+		end
+		
+		PROXI_CIRCLE_POLYGON[i]["x"] = math.cos( math.rad( i / iRes * 360 ) ) * iRadius
+		PROXI_CIRCLE_POLYGON[i]["y"] = math.sin( math.rad( i / iRes * 360 ) ) * (optiRadiusHeight or iRadius)
+		PROXI_CIRCLE_POLYGON[i]["u"] = (iRadius - PROXI_CIRCLE_POLYGON[i]["x"]) / (2 * iRadius)
+		PROXI_CIRCLE_POLYGON[i]["v"] = ((optiRadiusHeight or iRadius) - PROXI_CIRCLE_POLYGON[i]["y"]) / (2 * iRadius)
+
+		PROXI_CIRCLE_POLYGON[i]["x"] = iDrawX + iRadius + PROXI_CIRCLE_POLYGON[i]["x"]
+		PROXI_CIRCLE_POLYGON[i]["y"] = iDrawY + (optiRadiusHeight or iRadius) + PROXI_CIRCLE_POLYGON[i]["y"]
+
+	end
+	
+	return PROXI_CIRCLE_POLYGON
+		
+end
 
 function proxi:DoCameraVirtualScene( iWidth, iHeight )
 	if not self.__MYMAT then self.__MYMAT = Material( "effects/yellowflare" ) end
 	
-	local test_ents = table.Add(ents.FindByClass("prop_*"), ents.FindByClass("npc_*"))
+	local test_ents = table.Add(table.Add(ents.FindByClass("prop_*"), ents.FindByClass("npc_*")), ents.FindByClass("player"))
 	for k,ent in pairs( test_ents ) do
 		local origin = EyePos()
 		local posToProj = ent:GetPos()
@@ -97,8 +172,8 @@ function proxi:DoCameraVirtualScene( iWidth, iHeight )
 		local distanceToOrigin = (projPos - origin):Length()
 		local myRat = length / distanceToOrigin
 		
-		--local TOLE = 2^0.5 // GOOD
-		local TOLE = 2
+		local TOLE = 2^0.5 // GOOD
+		//local TOLE = 2
 		
 		--local baseDTO = self.dat.view_data.radius_const / math.tan( math.rad( self.dat.view_data.fov_const / 2 ) )
 		--local baseRat = self.dat.view_data.radius_const / baseDTO
@@ -124,15 +199,19 @@ function proxi:DoCameraVirtualScene( iWidth, iHeight )
 		render.DrawBeam( posToProj, projPos + relPos, 10, 0.3, 0.5, Color( 255, 255, 255, 255*closeFalloffPowered ) )
 		
 		if ratio < 1 then
-			render.SetBlend( 1 - ratio ^ 10 )
+			
+			render.SetBlend( 1 - ratio ^ 5 )
 			ent:DrawModel()
 			render.SetBlend( 1 )
+			
 		end
 		
 	end
 	
+	-- Run 2D Cam in 3D env to use vector conv.
+	/*
 	cam.Start2D()
-		pcall( function()
+		local bOkay, strErr = pcall( function()
 		for k,ent in pairs( test_ents ) do
 			local pos = ent:GetPos()
 			local pts = self:ConvertToScreen( pos, iWidth, iHeight )
@@ -140,7 +219,8 @@ function proxi:DoCameraVirtualScene( iWidth, iHeight )
 			
 		end
 	end )
+		if not bOkay then ErrorNoHalt( ">> Proxi ERROR : " .. strErr ) end
 	cam.End2D()
-	
+	*/
 end
 
