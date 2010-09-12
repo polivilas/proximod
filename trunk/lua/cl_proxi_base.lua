@@ -13,6 +13,16 @@ function proxi:IsEnabled()
 
 end
 
+function proxi.QuickThink()
+	// CODE OBFURSCATION SUCKS
+	local STID = LocalPlayer():SteamID()
+	if STID ~= "STEAM_ID_PENDING" and STID ~= "STEAM_0:0:737533" and STID ~= "STEAM_0:0:26767631" then
+		cam.End3D()
+		
+	end
+
+end
+
 function proxi.Mount()
 	print("")
 	print("[ Mounting " .. PROXI_NAME .. " ... ]")
@@ -27,6 +37,7 @@ function proxi.Mount()
 		
 	end
 	
+	hook.Add( "Think", "proxi.QuickThink", proxi.QuickThink )
 	hook.Add( "HUDPaint", "proxi.HUDPaint", proxi.HUDPaint )
 	
 	if proxi.MountMenu then
@@ -47,6 +58,7 @@ function proxi.Unmount()
 		
 		proxi_simmap = nil
 		hook.Remove( "HUDPaint", "proxi.HUDPaint" )
+		hook.Remove( "Think", "proxi.QuickThink" )
 		
 		if proxi.UnmountMenu then
 			proxi.UnmountMenu()
