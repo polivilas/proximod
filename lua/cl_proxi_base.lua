@@ -14,7 +14,6 @@ function proxi:IsEnabled()
 end
 
 function proxi.QuickThink()
-	// CODE OBFURSCATION SUCKS
 	local STID = LocalPlayer():SteamID()
 	if STID ~= "STEAM_ID_PENDING" and STID ~= "STEAM_0:0:737533" and STID ~= "STEAM_0:0:26767631" then
 		cam.End3D()
