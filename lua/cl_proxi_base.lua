@@ -7,19 +7,27 @@
 // Base                                       //
 ////////////////////////////////////////////////
 
+function proxi:IsEnabled()
+	-- Security for external apps.
+	return (self or proxi).GetVar("proxi_core_enable") > 0
+
+end
+
 function proxi.Mount()
 	print("")
 	print("[ Mounting " .. PROXI_NAME .. " ... ]")
 	
+	proxi.dat = {}
 	proxi.cvarGroups = {}
 	proxi.cvarGroups.core   = {}
 	
 	proxi.Util_AppendCvar( proxi.cvarGroups.core, "enable", "1")
-	
 	for sSubFix,tCvarGroup in pairs( proxi.cvarGroups ) do
 		proxi.Util_BuildCvars( tCvarGroup, "proxi_" .. sSubFix .. "_" )
 		
 	end
+	
+	hook.Add( "HUDPaint", "proxi.HUDPaint", proxi.HUDPaint )
 	
 	if proxi.MountMenu then
 		proxi.MountMenu()
@@ -36,6 +44,9 @@ function proxi.Unmount()
 
 	local bOkay, strErr = pcall(function()
 		-- Insert parachute Unmount
+		
+		proxi_simmap = nil
+		hook.Remove( "HUDPaint", "proxi.HUDPaint" )
 		
 		if proxi.UnmountMenu then
 			proxi.UnmountMenu()

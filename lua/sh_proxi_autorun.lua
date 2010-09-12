@@ -17,8 +17,8 @@ end
 
 PROXI_NAME = "Proxi"
 
-PROXI_FORCE_VERSION = false
-PROXI_FORCE_USE_CLOUD = true
+PROXI_FORCE_VERSION = true // !!
+PROXI_FORCE_USE_CLOUD = false // !!
 
 if (CLIENT or SinglePlayer()) then
 	if (proxi and proxi.Unmount) then proxi.Unmount() end
