@@ -262,6 +262,15 @@ function proxi.BuildMenu( opt_tExpand )
 		
 	end
 	
+	-- Style
+	proxi.Util_MakeCategory( refPanel, "Regular Mode", 1 )
+	proxi.Util_AppendSlider( refPanel, "Regular mode : X Relative Position", "proxi_regmod_xrel", 0, 1, 2)
+	proxi.Util_AppendSlider( refPanel, "Regular mode : Y Relative Position", "proxi_regmod_yrel", 0, 1, 2)
+	proxi.Util_AppendSlider( refPanel, "Regular mode : Size", "proxi_regmod_size", 32, 1024, 0)
+	
+	
+	
+	
 	if proxi_internal.IsUsingCloud then
 		if proxi_internal.IsUsingCloud() then
 			proxi.Util_MakeCategory( refPanel, "Using Cloud" .. (bCanGetVersion and (" [ v" .. tostring(MY_VERSION) .. " >> v" .. tostring(ONLINE_VERSION_READ) .. " ]") or " Version" ), 0 )

@@ -29,8 +29,12 @@ function proxi.Mount()
 	proxi.dat = {}
 	proxi.cvarGroups = {}
 	proxi.cvarGroups.core   = {}
+	proxi.cvarGroups.regmod   = {}
 	
 	proxi.Util_AppendCvar( proxi.cvarGroups.core, "enable", "1")
+	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "xrel", "0.2")
+	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "yrel", "0.8")
+	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "size", "128")
 	for sSubFix,tCvarGroup in pairs( proxi.cvarGroups ) do
 		proxi.Util_BuildCvars( tCvarGroup, "proxi_" .. sSubFix .. "_" )
 		
