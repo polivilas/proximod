@@ -15,6 +15,15 @@ function proxi.HUDPaint()
 
 end
 
+function proxi:RecomFuse()
+	local size = proxi.GetVar("proxi_regmod_size")
+	self.dat.view_data.draww = size
+	self.dat.view_data.drawh = size
+	self.dat.view_data.drawx = proxi.GetVar("proxi_regmod_xrel") * ScrW() - size / 2
+	self.dat.view_data.drawy = proxi.GetVar("proxi_regmod_yrel") * ScrH() - size / 2
+	
+end
+
 function proxi:RecomA()
 	self.dat.view_data.pos_func = function()
 		local dist = self.dat.view_data.radius_const / math.tan( math.rad( self.dat.view_data.fov_const / 2 ) )
@@ -39,7 +48,7 @@ function proxi:RecomC()
 	end
 	self.dat.view_data.ang_func = function() return Angle( 35, EyeAngles().y, 0 ) end
 	self.dat.view_data.radius_const = 512
-	self.dat.view_data.fov_const = 100
+	self.dat.view_data.fov_const = 10
 	self.dat.view_data.drawx = 12
 	self.dat.view_data.drawy = 256
 	self.dat.view_data.draww = 312
@@ -62,12 +71,18 @@ function proxi:RecomB()
 	
 end
 
+local RING_TEX_ID = surface.GetTextureID( "proxi/rad_ring.vmt" )
+local RING_MATFIX = 1.07
+
 function proxi:DoRenderVirtualScene()
 	if not self.dat.view_data then
 		self.dat.view_data = {}
 		proxi:RecomC()
 	end
 	
+	proxi:RecomFuse()
+	
+	-- We need these because Vector:ToScreen() uses the viewport as a reference, but use the raw Screen sizes from 0 to Screen Size as range of values no matter where the viewport is ou which size the viewport is
 	self.dat.view_data.raw_scrw = ScrW()
 	self.dat.view_data.raw_scrh = ScrH()
 	
@@ -85,21 +100,20 @@ function proxi:DoRenderVirtualScene()
 	render.SetStencilReferenceValue( 1 )
 	
 	surface.SetDrawColor( 0, 0, 0, 128 )
+	surface.SetTexture( nil )
 	surface.DrawPoly( self:CalcCircle( 36, iWidth / 2, self.dat.view_data.drawx, self.dat.view_data.drawy ) )
 	
-	
+	-- Operation : Keep (We don't want any stencil modification to happen after drawing the polygon).
 	render.SetStencilPassOperation( STENCILOPERATION_KEEP )
 	
-	local matfix = 1.07
-	local iSurfWidth, iSurfHeight = iWidth * matfix, iHeight * matfix
+	local iSurfWidth, iSurfHeight    = iWidth * RING_MATFIX, iHeight * RING_MATFIX
 	local iDrawXCenter, iDrawYCenter = xDraw + iWidth / 2, yDraw + iHeight / 2
 	surface.SetDrawColor( 255, 255, 255, 255 )
-	surface.SetTexture( surface.GetTextureID( "proxi/rad_ring.vmt" ) )
+	surface.SetTexture( RING_TEX_ID )
 	surface.DrawTexturedRectRotated( iDrawXCenter, iDrawYCenter, iSurfWidth, iSurfHeight, 0)
-	surface.SetTexture( nil )
 	
+	-- Comparaison : Equal : We want all operations to be drawn on the circle.
 	render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_EQUAL )
-	render.SetStencilPassOperation( STENCILOPERATION_REPLACE )
 	
 	cam.Start3D( self.dat.view_data.pos_func(), self.dat.view_data.ang_func(), self.dat.view_data.fov_const, xDraw, yDraw, iWidth, iHeight )
 		local bOkay, strErr = pcall( self.DoCameraVirtualScene, self, iWidth, iHeight )
@@ -129,8 +143,8 @@ local PROXI_CIRCLE_RADIUS = -1
 local PROXI_CIRCLE_IDX = -1
 local PROXI_CIRCLE_IDY = -1
 
-function proxi:CalcCircle( iRes, iRadius, iDrawX, iDrawY, optiRadiusHeight )
-	if PROXI_CIRCLE_RES == iRes and PROXI_CIRCLE_RADIUS == radius and PROXI_CIRCLE_IDX ~= iDrawX and PROXI_CIRCLE_IDY ~= iDrawY then return PROXI_CIRCLE_POLYGON end
+function proxi:CalcCircle( iRes, iRadius, iDrawX, iDrawY )
+	if PROXI_CIRCLE_RES == iRes and PROXI_CIRCLE_RADIUS == iRadius and PROXI_CIRCLE_IDX == iDrawX and PROXI_CIRCLE_IDY == iDrawY then return PROXI_CIRCLE_POLYGON end
 	
 	PROXI_CIRCLE_RES = iRes
 	PROXI_CIRCLE_RADIUS = iRadius
@@ -144,12 +158,12 @@ function proxi:CalcCircle( iRes, iRadius, iDrawX, iDrawY, optiRadiusHeight )
 		end
 		
 		PROXI_CIRCLE_POLYGON[i]["x"] = math.cos( math.rad( i / iRes * 360 ) ) * iRadius
-		PROXI_CIRCLE_POLYGON[i]["y"] = math.sin( math.rad( i / iRes * 360 ) ) * (optiRadiusHeight or iRadius)
+		PROXI_CIRCLE_POLYGON[i]["y"] = math.sin( math.rad( i / iRes * 360 ) ) * iRadius
 		PROXI_CIRCLE_POLYGON[i]["u"] = (iRadius - PROXI_CIRCLE_POLYGON[i]["x"]) / (2 * iRadius)
-		PROXI_CIRCLE_POLYGON[i]["v"] = ((optiRadiusHeight or iRadius) - PROXI_CIRCLE_POLYGON[i]["y"]) / (2 * iRadius)
+		PROXI_CIRCLE_POLYGON[i]["v"] = (iRadius - PROXI_CIRCLE_POLYGON[i]["y"]) / (2 * iRadius)
 
 		PROXI_CIRCLE_POLYGON[i]["x"] = iDrawX + iRadius + PROXI_CIRCLE_POLYGON[i]["x"]
-		PROXI_CIRCLE_POLYGON[i]["y"] = iDrawY + (optiRadiusHeight or iRadius) + PROXI_CIRCLE_POLYGON[i]["y"]
+		PROXI_CIRCLE_POLYGON[i]["y"] = iDrawY + iRadius + PROXI_CIRCLE_POLYGON[i]["y"]
 
 	end
 	
@@ -159,6 +173,8 @@ end
 
 function proxi:DoCameraVirtualScene( iWidth, iHeight )
 	if not self.__MYMAT then self.__MYMAT = Material( "effects/yellowflare" ) end
+	
+	--do return end
 	
 	local test_ents = table.Add(table.Add(ents.FindByClass("prop_*"), ents.FindByClass("npc_*")), ents.FindByClass("player"))
 	for k,ent in pairs( test_ents ) do
