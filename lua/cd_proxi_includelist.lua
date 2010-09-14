@@ -4,6 +4,8 @@ ADDON_PROP = {}
 table.insert( ADDON_PROP, "cl_proxi_base.lua" )
 --table.insert( ADDON_PROP, "cl_proxi_ph_simmap.lua" )
 table.insert( ADDON_PROP, "cl_proxi_dup_virtualscene.lua" )
+table.insert( ADDON_PROP, "cl_proxi_beacons.lua" )
+table.insert( ADDON_PROP, "cl_proxi_b_default.lua" )
 
 table.insert( ADDON_PROP, "cl_proxi_cvar_custom.lua" )
 table.insert( ADDON_PROP, "cl_proxi_util.lua" )
