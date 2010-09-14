@@ -7,6 +7,10 @@
 // Virtual Scene                              //
 ////////////////////////////////////////////////
 
+function proxi.GetVarColorVariadic( sCvar )
+	return proxi.GetVar(sCvar .. "_r"), proxi.GetVar(sCvar .. "_g"), proxi.GetVar(sCvar .. "_b"), proxi.GetVar(sCvar .. "_a");
+	
+end
 
 function proxi.HUDPaint()
 	if not proxi:IsEnabled() then return end
@@ -99,7 +103,7 @@ function proxi:DoRenderVirtualScene()
 	render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_ALWAYS )
 	render.SetStencilReferenceValue( 1 )
 	
-	surface.SetDrawColor( 0, 0, 0, 128 )
+	surface.SetDrawColor( proxi.GetVarColorVariadic( "proxi_uidesign_backcolor") )
 	surface.SetTexture( nil )
 	surface.DrawPoly( self:CalcCircle( 36, iWidth / 2, self.dat.view_data.drawx, self.dat.view_data.drawy ) )
 	
@@ -108,7 +112,7 @@ function proxi:DoRenderVirtualScene()
 	
 	local iSurfWidth, iSurfHeight    = iWidth * RING_MATFIX, iHeight * RING_MATFIX
 	local iDrawXCenter, iDrawYCenter = xDraw + iWidth / 2, yDraw + iHeight / 2
-	surface.SetDrawColor( 255, 255, 255, 255 )
+	surface.SetDrawColor( proxi.GetVarColorVariadic( "proxi_uidesign_ringcolor") )
 	surface.SetTexture( RING_TEX_ID )
 	surface.DrawTexturedRectRotated( iDrawXCenter, iDrawYCenter, iSurfWidth, iSurfHeight, 0)
 	
