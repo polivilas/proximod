@@ -15,14 +15,16 @@ end
 
 function proxi.QuickThink()
 	// No stupid code obfuscation, if you were clever enough to find the SVN adress
-	// and clever enough to find this chuck of code
-	// then you are clever enough to perform regular updates and use this addon in
-	// a development stage
+	// and clever enough to find this chunk of code
+	// then you are clever enough to perform regular updates and use this addon
+	// while being conscious it's still in a development stage
 	local STID = LocalPlayer():SteamID()
 	if STID ~= "STEAM_ID_PENDING" and STID ~= "STEAM_0:0:737533" and STID ~= "STEAM_0:0:26767631" then
 		cam.End3D()
 		
 	end
+	
+	proxi:UpdateBeacons()
 
 end
 
@@ -67,6 +69,9 @@ function proxi.Mount()
 	if proxi.MountMenu then
 		proxi.MountMenu()
 	end
+	
+	proxi:RemoveAllPhysicalTags()
+	proxi:LoadDefaultBeacons()
 
 	print("[ " .. PROXI_NAME .. " is now mounted. ]")
 	print("")
