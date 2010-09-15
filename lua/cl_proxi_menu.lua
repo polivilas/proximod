@@ -118,13 +118,26 @@ function proxi.BuildMenu( opt_tExpand )
 	proxi.Util_AppendSlider( refPanel, "Regular mode : X Relative Position", "proxi_regmod_xrel", 0, 1, 2)
 	proxi.Util_AppendSlider( refPanel, "Regular mode : Y Relative Position", "proxi_regmod_yrel", 0, 1, 2)
 	proxi.Util_AppendSlider( refPanel, "Regular mode : Size", "proxi_regmod_size", 32, 1024, 0)
+	proxi.Util_AppendSlider( refPanel, "Regular mode : Fov", "proxi_regmod_fov", 2, 100, 0)
+	proxi.Util_AppendSlider( refPanel, "Regular mode : Radius", "proxi_regmod_radius", 128, 4096, 0)
+	proxi.Util_AppendSlider( refPanel, "Regular mode : Angle", "proxi_regmod_angle", -90, 90, 0)
 	
 	-- UI Design
-	proxi.Util_MakeCategory( refPanel, "UI Design", 1 )
+	proxi.Util_MakeCategory( refPanel, "UI Design", 0 )
 	proxi.Util_AppendLabel( refPanel, "Ring color" )
 	proxi.Util_AppendColor( refPanel, "proxi_uidesign_ringcolor")
 	proxi.Util_AppendLabel( refPanel, "Background color" )
 	proxi.Util_AppendColor( refPanel, "proxi_uidesign_backcolor")
+	
+	-- Beacons
+	proxi.Util_MakeCategory( refPanel, "Beacons", 1 )
+	do
+		for sName,objBeacon in pairs( proxi:GetAllBeacons() ) do
+			proxi.Util_AppendCheckBox( refPanel, objBeacon:GetName() , "proxi_beacons_enable_" .. objBeacon:GetRawName() )
+			
+		end
+		
+	end
 	
 	
 	

@@ -98,76 +98,29 @@ function proxi:TagEntity( ent )
 	
 end
 
-function proxi:PerformMath( tEnts )
+local PROXI_STEPS = { 
+	[0] = "PerformMath",
+	[1] = "DrawUnderCircle",
+	[2] = "DrawUnderCircle2D",
+	[3] = "DrawOverCircle",
+	[4] = "DrawOverCircle2D",
+	[5] = "DrawOverEverything"
+}
+
+function proxi:DebugBeaconOps( tEnts, iStep )
+	local step = PROXI_STEPS[iStep]
 	for k,ent in pairs( tEnts ) do
 		if ValidEntity( ent ) then
 			for l,tag in pairs( ent.__proxi_tags ) do
-				local objBeacon = PROXI_BEACONS[tag]
 				// should we Run a check on the tag existence ? ?
-				if objBeacon.PerformMath and objBeacon:IsEnabled() then
-					objBeacon:PerformMath( ent )
+				local objBeacon = PROXI_BEACONS[tag]
+				if objBeacon[step] and objBeacon:IsEnabled() then
+					objBeacon[step]( objBeacon, ent )
 					
 				end
 				
 			end
 			
-		end
-		
-	end
-	
-end
-
-function proxi:DrawUnderCircle( tEnts )
-	for k,ent in pairs( tEnts ) do
-		if ValidEntity( ent ) then
-			for l,tag in pairs( ent.__proxi_tags ) do
-				local objBeacon = PROXI_BEACONS[tag]
-				// should we Run a check on the tag existence ? ?
-				if objBeacon.DrawUnderCircle and objBeacon:IsEnabled() then
-					objBeacon:DrawUnderCircle( ent )
-					
-				end
-				
-			end
-			
-		end
-		
-	end
-	
-end
-
-function proxi:DrawOverCircle( tEnts )
-	for k,ent in pairs( tEnts ) do
-		if ValidEntity( ent ) then
-			for l,tag in pairs( ent.__proxi_tags ) do
-				local objBeacon = PROXI_BEACONS[tag]
-				// should we Run a check on the tag existence ? ?
-				if objBeacon.DrawOverCircle and objBeacon:IsEnabled() then
-					objBeacon:DrawOverCircle( ent )
-					
-				end
-				
-			end
-			
-		end
-		
-	end
-	
-end
-
-function proxi:DrawOverEverything( tEnts )
-	for k,ent in pairs( tEnts ) do
-		if ValidEntity( ent ) then
-			for l,tag in pairs( ent.__proxi_tags ) do
-				local objBeacon = PROXI_BEACONS[tag]
-				// should we Run a check on the tag existence ? ?
-				if objBeacon.DrawOverEverything and objBeacon:IsEnabled() then
-					objBeacon:DrawOverEverything( ent )
-					
-				end
-				
-			end
-		
 		end
 		
 	end
@@ -189,12 +142,21 @@ function proxi.RegisterBeacon( objBeacon, sName )
 		
 	end
 	
+	objBeacon.Name = objBeacon.Name or ("<" .. sName .. ">")
 	objBeacon.__rawname = sName
 	PROXI_BEACONS[sName] = objBeacon
 	-- REPEAT : Won't make a metatable because there are so few base functions
 	proxi.CreateVar("proxi_beacons_enable_" .. sName, (objBeacon.DefaultOn or false) and 1 or 0)
 	function objBeacon.IsEnabled( self )
 		return proxi.GetVar("proxi_beacons_enable_" .. self.__rawname) > 0
+		
+	end
+	function objBeacon.GetName( self )
+		return self.Name
+		
+	end
+	function objBeacon.GetRawName( self )
+		return self.__rawname
 		
 	end
 	if objBeacon.Initialize then
