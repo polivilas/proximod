@@ -10,11 +10,7 @@
 local RING_TEX_ID = surface.GetTextureID( "proxi/rad_ring.vmt" )
 local RING_MATFIX = 1.07
 local PROXI_CURRENT_VIEWDATA = nil
-
-function proxi:GetVarColorVariadic( sCvar )
-	return self.GetVar(sCvar .. "_r"), self.GetVar(sCvar .. "_g"), self.GetVar(sCvar .. "_b"), self.GetVar(sCvar .. "_a");
-	
-end
+local PROXI_CALC_SCREENPOS = nil
 
 function proxi.HUDPaint()
 	if not proxi:IsEnabled() then return end
@@ -29,14 +25,22 @@ function proxi.HUDPaint()
 
 end
 
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+
 function proxi:RegularEvaluate()
 	local size = proxi.GetVar("proxi_regmod_size")
 	self.dat.view_data.draww = size
 	self.dat.view_data.drawh = size
 	self.dat.view_data.drawx = proxi.GetVar("proxi_regmod_xrel") * ScrW() - size / 2
 	self.dat.view_data.drawy = proxi.GetVar("proxi_regmod_yrel") * ScrH() - size / 2
+	self.dat.view_data.fov_const    = proxi.GetVar("proxi_regmod_fov")
+	self.dat.view_data.radius_const = proxi.GetVar("proxi_regmod_radius")
 	
 end
+
+////////////////////////////////////////////////
+////////////////////////////////////////////////
 
 function proxi:RecomA()
 	self.dat.view_data.pos_func = function()
@@ -50,26 +54,6 @@ function proxi:RecomA()
 	self.dat.view_data.ang_func = function() return Angle( 90, EyeAngles().y, 0 ) end
 	self.dat.view_data.radius_const = 1024
 	self.dat.view_data.fov_const = 4
-	self.dat.view_data.drawx = 12
-	self.dat.view_data.drawy = 256
-	self.dat.view_data.draww = 312
-	self.dat.view_data.drawh = 312
-	self.dat.view_data.margin = 2^0.5
-	
-end
-
-function proxi:RecomC()
-	self.dat.view_data.pos_func = function()
-		local dist = self.dat.view_data.radius_const / math.tan( math.rad( self.dat.view_data.fov_const / 2 ) )
-		return EyePos() - self.dat.view_data.ang_func():Forward() * dist
-		
-	end
-	
-	self.dat.view_data.pos = nil
-	self.dat.view_data.ang = nil
-	self.dat.view_data.ang_func = function() return Angle( 35, EyeAngles().y, 0 ) end
-	self.dat.view_data.radius_const = 512
-	self.dat.view_data.fov_const = 10
 	self.dat.view_data.drawx = 12
 	self.dat.view_data.drawy = 256
 	self.dat.view_data.draww = 312
@@ -97,6 +81,29 @@ function proxi:RecomB()
 	
 end
 
+function proxi:RecomC()
+	self.dat.view_data.pos_func = function()
+		local dist = self.dat.view_data.radius_const / math.tan( math.rad( self.dat.view_data.fov_const / 2 ) )
+		return EyePos() - self.dat.view_data.ang_func():Forward() * dist
+		
+	end
+	
+	self.dat.view_data.pos = nil
+	self.dat.view_data.ang = nil
+	self.dat.view_data.ang_func = function() return Angle( proxi.GetVar("proxi_regmod_angle"), EyeAngles().y, 0 ) end
+	self.dat.view_data.radius_const = 512
+	self.dat.view_data.fov_const = 10
+	self.dat.view_data.drawx = 12
+	self.dat.view_data.drawy = 256
+	self.dat.view_data.draww = 312
+	self.dat.view_data.drawh = 312
+	self.dat.view_data.margin = 2^0.5
+	
+end
+
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+
 function proxi:GetCurrentViewData()
 	return PROXI_CURRENT_VIEWDATA
 end
@@ -111,6 +118,13 @@ function proxi:DoRenderVirtualScene( viewData )
 	local xDraw, yDraw    = viewData.drawx, viewData.drawy
 	local iWidth, iHeight = viewData.draww, viewData.drawh
 	
+	-- Calculate actual values
+	viewData.pos = viewData.pos_func()
+	viewData.ang = viewData.ang_func()
+	viewData.baseratio = math.tan( math.rad( viewData.fov_const / 2 / viewData.margin ) )
+	
+	
+	
 	render.ClearStencil()
 	render.SetStencilEnable( true )
 	render.SetStencilFailOperation( STENCILOPERATION_KEEP )
@@ -118,46 +132,90 @@ function proxi:DoRenderVirtualScene( viewData )
 	render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_ALWAYS )
 	render.SetStencilReferenceValue( 1 )
 	
-	surface.SetDrawColor( self:GetVarColorVariadic( "proxi_uidesign_backcolor") )
+	---- Background circle
+	surface.SetDrawColor( self:Util_GetVarColorVariadic( "proxi_uidesign_backcolor") )
 	surface.SetTexture( nil )
 	surface.DrawPoly( self:CalcCircle( 36, iWidth / 2, viewData.drawx, viewData.drawy ) )
 	
 	-- Operation : Keep (We don't want any stencil modification to happen after drawing the polygon).
 	render.SetStencilPassOperation( STENCILOPERATION_KEEP )
 	
-	local iSurfWidth, iSurfHeight    = iWidth * RING_MATFIX, iHeight * RING_MATFIX
-	local iDrawXCenter, iDrawYCenter = xDraw + iWidth / 2, yDraw + iHeight / 2
-	surface.SetDrawColor( self:GetVarColorVariadic( "proxi_uidesign_ringcolor") )
-	surface.SetTexture( RING_TEX_ID )
-	surface.DrawTexturedRectRotated( iDrawXCenter, iDrawYCenter, iSurfWidth, iSurfHeight, 0)
+	---- Undercontents
 	
 	-- Comparaison : Equal : We want all operations to be drawn on the circle.
 	render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_EQUAL )
 	
-	viewData.pos = viewData.pos_func()
-	viewData.ang = viewData.ang_func()
-	viewData.baseratio = math.tan( math.rad( viewData.fov_const / 2 / viewData.margin ) )
-	
 	cam.Start3D( viewData.pos, viewData.ang, viewData.fov_const, xDraw, yDraw, iWidth, iHeight )
-		local bOkay, strErr = pcall( self.DoCameraOverScene, self, viewData )
+		local bOkayFirst, strErrFirst = pcall( self.DoCameraMath, self, viewData )
+		if bOkayFirst then
+			local bOkay, strErr = pcall( self.DoCameraUnderScene, self, viewData )
+			if not bOkay then ErrorNoHalt( ">> Proxi ERROR : " .. strErr ) end
+			
+		end
 		
 	cam.End3D()
+	if not bOkayFirst then ErrorNoHalt( ">> Proxi ERROR : " .. strErrFirst )	end
 	
-	if not bOkay then ErrorNoHalt( ">> Proxi ERROR : " .. strErr ) end
+	---- Drawing the ring.
+
+	-- Compare : We want it only to draw no matter what
+	render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_ALWAYS )
+	
+	local iSurfWidth, iSurfHeight    = iWidth * RING_MATFIX, iHeight * RING_MATFIX
+	local iDrawXCenter, iDrawYCenter = xDraw + iWidth / 2, yDraw + iHeight / 2
+	surface.SetDrawColor( self:Util_GetVarColorVariadic( "proxi_uidesign_ringcolor") )
+	surface.SetTexture( RING_TEX_ID )
+	surface.DrawTexturedRectRotated( iDrawXCenter, iDrawYCenter, iSurfWidth, iSurfHeight, 0)
+	
+	---- Preparing Overcontents
+	if bOkayFirst then
+		-- Comparaison : Equal : We want all operations to be drawn on the circle.
+	render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_EQUAL )
+		
+		---- Overcontents
+		cam.Start3D( viewData.pos, viewData.ang, viewData.fov_const, xDraw, yDraw, iWidth, iHeight )
+			local bOkay, strErr = pcall( self.DoCameraOverScene, self, viewData )
+			
+		cam.End3D()
+		if not bOkay then ErrorNoHalt( ">> Proxi ERROR : " .. strErr ) end
+		
+	end
 	
 	render.SetStencilEnable( false )
 	
-	--draw.SimpleText( "LOL", "ScoreboardText", 20, 20, Color( 255, 255, 255, 255 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 end
 
-function proxi:ConvertToScreen( vPos, viewData )
-	local pts = vPos:ToScreen()
-		pts.x = pts.x / viewData.raw_scrw * viewData.draww
-		pts.y = pts.y / viewData.raw_scrh * viewData.drawh
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+
+function proxi:ConvertPosToScreen( vPos, fAlterX, fAlterY )
+	PROXI_CALC_SCREENPOS = vPos:ToScreen()
+	PROXI_CALC_SCREENPOS.x = (PROXI_CALC_SCREENPOS.x / PROXI_CURRENT_VIEWDATA.raw_scrw + (fAlterX or 0) / 2) * PROXI_CURRENT_VIEWDATA.draww
+	PROXI_CALC_SCREENPOS.y = (PROXI_CALC_SCREENPOS.y / PROXI_CURRENT_VIEWDATA.raw_scrh + (fAlterY or 0) / 2) * PROXI_CURRENT_VIEWDATA.drawh
 	
-	return pts
+	return PROXI_CALC_SCREENPOS.x, PROXI_CALC_SCREENPOS.y
 	
 end
+
+function proxi:ConvertPosToRelative( vPos )
+	PROXI_CALC_SCREENPOS = vPos:ToScreen()
+	PROXI_CALC_SCREENPOS.x = (PROXI_CALC_SCREENPOS.x / PROXI_CURRENT_VIEWDATA.raw_scrw) * 2 - 1
+	PROXI_CALC_SCREENPOS.y = (PROXI_CALC_SCREENPOS.y / PROXI_CURRENT_VIEWDATA.raw_scrh) * 2 - 1
+	
+	return PROXI_CALC_SCREENPOS.x, PROXI_CALC_SCREENPOS.y
+	
+end
+
+function proxi:ConvertRevativeToScreen( fAlterX, fAlterY )
+	local x,y = (fAlterX + 1) / 2 * PROXI_CURRENT_VIEWDATA.draww, (fAlterY + 1) / 2 * PROXI_CURRENT_VIEWDATA.drawh
+	
+	return x, y
+	
+end
+
+
+////////////////////////////////////////////////
+////////////////////////////////////////////////
 
 local PROXI_CAMERA_FIX = 1
 local PROXI_CIRCLE_POLYGON = {}
@@ -196,6 +254,9 @@ function proxi:CalcCircle( iRes, iRadius, iDrawX, iDrawY )
 		
 end
 
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+
 function proxi:ProjectPosition( tMath, posToProj )
 	-- PROXI_CURRENT_VIEWDATA.pos = tMath.origin = EyePos() ((Reevaluation))
 	tMath.posToProj = posToProj
@@ -225,141 +286,54 @@ function proxi:GetConeProjectedPosition( tMath )
 end
 
 function proxi:GetFalloff( tMath, iFallOff, optbExtras )
-	local closeFalloff = math.Clamp( tMath.distanceToOrigin / iFallOff, 0, 1)
+	tMath.closeFalloff = math.Clamp( tMath.distanceToOrigin / iFallOff, 0, 1)
 	
 	if not optbExtras then
-		return closeFalloff
+		return tMath.closeFalloff
 		
 	else
-		return closeFalloff, closeFalloff ^ 2, 1 - (1 - closeFalloff) ^ 2
+		return tMath.closeFalloff, self:Util_CalcPowerUniform( tMath.closeFalloff )
 		
 	end
+	
+end
+
+function proxi:DoCameraMath( viewData )
+	self:DebugBeaconOps( self:GetTaggedEntities(), 0 )
+	
+end
+
+////////////////////////////////////////////////
+////////////////////////////////////////////////
+
+function proxi:DoCameraUnderScene( viewData )
+	self:DebugBeaconOps( self:GetTaggedEntities(), 1 )
+	
+	cam.Start2D()
+		local bOkay, strErr = pcall( function()
+		self:DebugBeaconOps( self:GetTaggedEntities(), 2 )
+		
+	end )
+	cam.End2D()
+	
+	if not bOkay then ErrorNoHalt( ">> Proxi ERROR : " .. strErr ) end
 	
 end
 
 function proxi:DoCameraOverScene( viewData )
-	self:DrawOverCircle( self:GetTaggedEntities() )
+	self:DebugBeaconOps( self:GetTaggedEntities(), 3 )
 	
-	--do return end
-	
-	/*
-	local test_ents = table.Add(table.Add(ents.FindByClass("prop_*"), ents.FindByClass("npc_*")), ents.FindByClass("player"))
-	local myMath = {}
-	for k,ent in pairs( test_ents ) do
-		self:ProjectPosition( myMath, ent:GetPos() )		
-		local closeFalloff, closeFalloffPowered, closeFalloffAntiPowered = self:GetFalloff( myMath, 256, true )
-		local conePos = self:GetConeProjectedPosition( myMath )
-		
-		render.SetMaterial( self.__MYMAT )
-		render.DrawSprite( conePos, 32, 32, Color( 255, 255, 255, 255 * closeFalloffAntiPowered ) ) ////
-		render.DrawSprite( myMath.posToProj, 32, 32, Color( 255, 255, 255, 255 ) )
-		render.DrawBeam( myMath.posToProj, conePos, 10, 0.3, 0.5, Color( 255, 255, 255, 255 * closeFalloffPowered ) )
-		
-		if myMath.ratio < 1 then
-			render.SetBlend( 1 - myMath.ratio ^ 5 )
-			ent:DrawModel()
-			render.SetBlend( 1 )
-			
-		end
-		
-	end
-	*/
-	
-	-- Run 2D Cam in 3D env to use vector conv.
-	/*
 	cam.Start2D()
 		local bOkay, strErr = pcall( function()
-		for k,ent in pairs( test_ents ) do
-			local pos = ent:GetPos()
-			local pts = self:ConvertToScreen( pos, viewData )
-			draw.SimpleText(  "  <" .. k, "ScoreboardText", pts.x, pts.y, Color( 255, 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-			
-		end
+		self:DebugBeaconOps( self:GetTaggedEntities(), 4 )
+		render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_ALWAYS )
+		self:DebugBeaconOps( self:GetTaggedEntities(), 5 )
+		//surface.SetDrawColor( 255, 255, 255, 64 )
+		//surface.DrawRect( 0, 0, ScrW(), ScrH() )
+		
 	end )
-		if not bOkay then ErrorNoHalt( ">> Proxi ERROR : " .. strErr ) end
 	cam.End2D()
-	*/
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-if false then // NEVER EXECUTE THIS BIT I WANT THE SYNTAX COLOR
-	function proxi:DoCameraVirtualScene( iWidth, iHeight )
-		if not self.__MYMAT then self.__MYMAT = Material( "effects/yellowflare" ) end
-		
-		--do return end
-		
-		local test_ents = table.Add(table.Add(ents.FindByClass("prop_*"), ents.FindByClass("npc_*")), ents.FindByClass("player"))
-		for k,ent in pairs( test_ents ) do
-			local origin = EyePos()
-			local posToProj = ent:GetPos()
-			local norm = self.dat.view_data.ang_func():Forward()
-			local projPos = origin + norm * (posToProj - origin):Dot( norm )
-			local relPos = posToProj - projPos
-			
-			local length = relPos:Length()
-			local distanceToOrigin = (projPos - origin):Length()
-			local myRat = length / distanceToOrigin
-			
-			local TOLE = 2^0.5 // GOOD
-			//local TOLE = 2
-			
-			--local baseDTO = self.dat.view_data.radius_const / math.tan( math.rad( self.dat.view_data.fov_const / 2 ) )
-			--local baseRat = self.dat.view_data.radius_const / baseDTO
-			local baseRat = math.tan( math.rad( self.dat.view_data.fov_const / 2 / TOLE ) )
-			
-			local ratio = math.Clamp( myRat / baseRat, 0, 1)
-			if ratio >= 1 then
-				relPos = relPos:Normalize() * baseRat * distanceToOrigin
-				
-			end
-			
-			local closeFalloff = math.Clamp(distanceToOrigin / 256, 0, 1)
-			local closeFalloffPowered = closeFalloff ^ 2
-			local closeFalloffAntiPowered = 1 - (1 - closeFalloff) ^ 2
-			local size = ((ent:OBBMins() - ent:OBBMaxs()):Length() - ratio ^ 2 * 0.8)
-			
-			render.SetMaterial( self.__MYMAT )
-			render.DrawSprite( projPos + relPos, 32, 32, Color( 255, 255, 255, 255*closeFalloffAntiPowered ) ) ////
-			render.DrawSprite( posToProj, 32, 32, Color( 255, 255, 255, 255 ) )
-			render.DrawBeam( posToProj, projPos + relPos, 10, 0.3, 0.5, Color( 255, 255, 255, 255*closeFalloffPowered ) )
-			
-			if ratio < 1 then
-				
-				render.SetBlend( 1 - ratio ^ 5 )
-				ent:DrawModel()
-				render.SetBlend( 1 )
-				
-			end
-			
-		end
-		
-		-- Run 2D Cam in 3D env to use vector conv.
-		/*
-		cam.Start2D()
-			local bOkay, strErr = pcall( function()
-			for k,ent in pairs( test_ents ) do
-				local pos = ent:GetPos()
-				local pts = self:ConvertToScreen( pos, iWidth, iHeight )
-				draw.SimpleText(  "  <" .. k, "ScoreboardText", pts.x, pts.y, Color( 255, 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-				
-			end
-		end )
-			if not bOkay then ErrorNoHalt( ">> Proxi ERROR : " .. strErr ) end
-		cam.End2D()
-		*/
-	end
+	
+	if not bOkay then ErrorNoHalt( ">> Proxi ERROR : " .. strErr ) end
+	
 end

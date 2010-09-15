@@ -7,6 +7,15 @@
 // Utility functions                          //
 ////////////////////////////////////////////////
 
+function proxi:Util_CalcPowerUniform( fUniform )
+	return fUniform ^ 2, (1 - (1 - fUniform) ^ 2 )
+end
+
+function proxi:Util_GetVarColorVariadic( sCvar )
+	return self.GetVar(sCvar .. "_r"), self.GetVar(sCvar .. "_g"), self.GetVar(sCvar .. "_b"), self.GetVar(sCvar .. "_a");
+	
+end
+
 function proxi.Util_AppendCvar( tGroup, sName, oDefault, sType, ... )
 	if not sType then
 		tGroup[sName] = oDefault
