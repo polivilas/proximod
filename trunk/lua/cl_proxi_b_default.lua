@@ -10,6 +10,7 @@
 function proxi:LoadDefaultBeacons()
 	do
 		local BEACON = {}
+		BEACON.Name         = "Players"
 		BEACON.DefaultOn    = true
 		BEACON.IsStandAlone = false
 		
@@ -67,6 +68,7 @@ function proxi:LoadDefaultBeacons()
 	
 	do
 		local BEACON = {}
+		BEACON.Name         = "Props"
 		BEACON.DefaultOn    = true
 		BEACON.IsStandAlone = false
 		
@@ -131,10 +133,9 @@ function proxi:LoadDefaultBeacons()
 		
 	end
 	
-	
-	
 	do
 		local BEACON = {}
+		BEACON.Name         = "Rockets"
 		BEACON.DefaultOn    = true
 		BEACON.IsStandAlone = false
 		
@@ -210,6 +211,171 @@ function proxi:LoadDefaultBeacons()
 		end
 		
 		proxi.RegisterBeacon( BEACON, "rockets" )
+		
+	end
+	
+	do
+		local BEACON = {}
+		BEACON.Name         = "Bolts"
+		BEACON.DefaultOn    = true
+		BEACON.IsStandAlone = false
+		
+		function BEACON:Initialize()
+			self.myMathPool = {}
+			self.myMaterial = Material( "effects/yellowflare" )
+			
+		end
+		
+		function BEACON:ShouldTag( entity )
+			return entity:GetClass() == "crossbow_bolt"
+			
+		end
+		
+		function BEACON:PerformMath( ent )
+			if not self.myMathPool[ ent ] then
+				self.myMathPool[ ent ] = {}
+			end
+			local thisMathPool = self.myMathPool[ ent ]
+			
+			proxi:ProjectPosition( thisMathPool, ent:GetPos() )		
+			proxi:GetFalloff( thisMathPool, 256 )
+			proxi:GetConeProjectedPosition( thisMathPool )
+			
+		end
+		
+		function BEACON:DrawUnderCircle( ent )
+			local thisMathPool = self.myMathPool[ ent ]
+			local cfP, cfAP = proxi:Util_CalcPowerUniform( thisMathPool.closeFalloff )
+			
+			if not thisMathPool.tracedata then
+				thisMathPool.tracedata = {}
+				thisMathPool.tracedata.filter = ent
+				
+				thisMathPool.traceres = {}
+				
+			end
+			
+			thisMathPool.tracedata.start = thisMathPool.posToProj
+			thisMathPool.tracedata.endpos = thisMathPool.posToProj + ent:GetVelocity():Normalize() * 16384
+			thisMathPool.traceres = util.TraceLine( thisMathPool.tracedata )
+			
+			render.SetMaterial( self.myMaterial )
+			--render.DrawSprite( thisMathPool.posToProj, 32, 32, Color( 255, 255, 255, 255 ) )
+			render.DrawBeam( thisMathPool.posToProj, thisMathPool.posToProj + ent:GetVelocity() * 2, 32, 0.5, 1, Color( 255, 255, 0, 255 ) )
+			render.DrawBeam( thisMathPool.posToProj, thisMathPool.posToProj - ent:GetVelocity() * 0.5, 32, 0.5, 1, Color( 255, 0, 0, 128 ) )
+			render.DrawSprite( thisMathPool.conePos, 128, 128, Color( 255, 255, 0, 255 ) ) ////
+			
+			render.DrawSprite( thisMathPool.traceres.HitPos, 256, 256, Color( 255, 255, 255, 255 ) ) ////
+			
+		end
+		
+		function BEACON:DrawUnderCircle2D( ent )
+		end
+		
+		function BEACON:DrawOverCircle( ent )
+			
+		end
+
+		function BEACON:DrawOverEverything( ent, fDist, fAngle )
+		end
+		
+		proxi.RegisterBeacon( BEACON, "bolts" )
+		
+	end
+	
+	do
+		local BEACON = {}
+		BEACON.Name         = "LOS"
+		BEACON.DefaultOn    = true
+		BEACON.IsStandAlone = false
+		
+		function BEACON:Initialize()
+			self.myMathPool = {}
+			self.myMaterial = Material( "effects/yellowflare" )
+			
+		end
+		
+		function BEACON:ShouldTag( entity )
+			return entity:IsPlayer()
+			
+		end
+		
+		function BEACON:PerformMath( ent )			
+		end
+		
+		function BEACON:DrawUnderCircle( ent )
+			render.SetMaterial( self.myMaterial )
+			render.DrawBeam( ent:GetShootPos(), ent:GetShootPos() + ent:GetAimVector() * 1024, 64, 0.5, 1, Color( 255, 255, 255, 64 ) )
+			
+		end
+		
+		function BEACON:DrawUnderCircle2D( ent )
+		end
+		
+		function BEACON:DrawOverCircle( ent )
+			
+		end
+
+		function BEACON:DrawOverEverything( ent, fDist, fAngle )
+		end
+		
+		proxi.RegisterBeacon( BEACON, "LOS" )
+		
+	end
+	
+	do
+		local BEACON = {}
+		BEACON.Name         = "Nades"
+		BEACON.DefaultOn    = true
+		BEACON.IsStandAlone = false
+		
+		function BEACON:Initialize()
+			self.myMathPool = {}
+			self.myMaterial = Material( "effects/yellowflare" )
+			
+		end
+		
+		function BEACON:ShouldTag( entity )
+			return entity:GetClass() == "npc_grenade_frag"
+			
+		end
+		
+		function BEACON:PerformMath( ent )
+			if not self.myMathPool[ ent ] then
+				self.myMathPool[ ent ] = {}
+			end
+			local thisMathPool = self.myMathPool[ ent ]
+			
+			proxi:ProjectPosition( thisMathPool, ent:GetPos() )		
+			proxi:GetFalloff( thisMathPool, 256 )
+			proxi:GetConeProjectedPosition( thisMathPool )
+			
+		end
+		
+		function BEACON:DrawUnderCircle( ent )
+			local thisMathPool = self.myMathPool[ ent ]
+			local cfP, cfAP = proxi:Util_CalcPowerUniform( thisMathPool.closeFalloff )
+			
+			render.SetMaterial( self.myMaterial )
+			
+			for i=1,10 do
+				render.DrawBeam( thisMathPool.conePos, thisMathPool.conePos - ent:GetVelocity() + VectorRand() * 128, 32, 0.5, 1, Color( 255, 0, 0, 128 ) )
+			end
+			render.DrawSprite( thisMathPool.conePos, 256 + 128 * math.sin( CurTime() * math.pi * 2 * 3 ), 256 + 128 * math.sin( CurTime() * math.pi * 2 * 3 ), Color( 255, 0, 0, 255 ) ) ////
+			
+		end
+		
+		function BEACON:DrawUnderCircle2D( ent )
+		end
+		
+		function BEACON:DrawOverCircle( ent )
+			
+		end
+
+		function BEACON:DrawOverEverything( ent, fDist, fAngle )
+		end
+		
+		proxi.RegisterBeacon( BEACON, "nades" )
 		
 	end
 	

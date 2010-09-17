@@ -12,6 +12,10 @@ local RING_MATFIX = 1.07
 local PROXI_CURRENT_VIEWDATA = nil
 local PROXI_CALC_SCREENPOS = nil
 
+function proxi:GetPinScale()
+	return self.GetVar( "proxi_regmod_size" ) / 256
+end
+
 function proxi.HUDPaint()
 	if not proxi:IsEnabled() then return end
 	
@@ -206,7 +210,7 @@ function proxi:ConvertPosToRelative( vPos )
 	
 end
 
-function proxi:ConvertRevativeToScreen( fAlterX, fAlterY )
+function proxi:ConvertRelativeToScreen( fAlterX, fAlterY )
 	local x,y = (fAlterX + 1) / 2 * PROXI_CURRENT_VIEWDATA.draww, (fAlterY + 1) / 2 * PROXI_CURRENT_VIEWDATA.drawh
 	
 	return x, y
@@ -269,10 +273,14 @@ function proxi:ProjectPosition( tMath, posToProj )
 	tMath.length = tMath.relativePos:Length()
 	tMath.distanceToOrigin = (tMath.projectedPos - PROXI_CURRENT_VIEWDATA.pos):Length()
 	
-	tMath.ratio = tMath.length / tMath.distanceToOrigin
+	// WARNING : AMBIGUOUS CODE.
+	//
+	// WAS :
+	tMath.relativity = tMath.length / tMath.distanceToOrigin
+	tMath.ratio      = tMath.relativity / PROXI_CURRENT_VIEWDATA.baseratio
 	
-	tMath.ratioClamped = math.Clamp( tMath.ratio / PROXI_CURRENT_VIEWDATA.baseratio, 0, 1)
-	if tMath.ratioClamped >= 1 then
+	tMath.ratioClamped = tMath.ratio > 1 and 1 or tMath.ratio
+	if tMath.ratioClamped == 1 then
 		tMath.relativePos = tMath.relativePos:Normalize() * PROXI_CURRENT_VIEWDATA.baseratio * tMath.distanceToOrigin
 		
 	end

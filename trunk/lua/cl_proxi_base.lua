@@ -74,7 +74,7 @@ function proxi.Mount()
 	end
 	
 	proxi:RemoveAllPhysicalTags()
-	proxi:LoadDefaultBeacons()
+	proxi:InitializeBeacons( )
 
 	print("[ " .. PROXI_NAME .. " is now mounted. ]")
 	print("")

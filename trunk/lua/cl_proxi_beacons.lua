@@ -13,9 +13,15 @@ local PROXI_BEACONS    = {}
 local PROXI_STANDALONE = {}
 
 local PROXI_LastQueryBeacons = 0
-local PROXI_BeaconQueryDelay = 1.0 -- Seconds.
+local PROXI_BeaconQueryDelay = 0.1 -- Seconds.
 
 local PROXI_TaggedEntities = {}
+
+function proxi:ResetAllTags()
+	PROXI_TaggedEntities = {}
+	proxi:RemoveAllPhysicalTags()
+	
+end
 
 function proxi:RemoveAllPhysicalTags()
 	local allEnts = ents.GetAll()
@@ -77,7 +83,7 @@ function proxi:TagEntity( ent )
 	local tags = {}
 	for tag,objBecon in pairs( PROXI_BEACONS ) do
 		-- NO MATTER IF THE BEACON IS ENABLED OR NOT
-		// Tink about algorithm again ?
+		// Think about algorithm again ?
 		if not objBecon.IsStandAlone then
 			if objBecon:ShouldTag( ent ) then
 				table.insert(tags, tag)
@@ -108,18 +114,47 @@ local PROXI_STEPS = {
 }
 
 function proxi:DebugBeaconOps( tEnts, iStep )
-	local step = PROXI_STEPS[iStep]
+	local sStep = PROXI_STEPS[iStep]
+	self:DebugEntOps( sStep, tEnts )
+	self:DebugStandAloneOps( sStep )
+	
+end
+
+function proxi:DebugEntOps( sStep, tEnts )
 	for k,ent in pairs( tEnts ) do
 		if ValidEntity( ent ) then
 			for l,tag in pairs( ent.__proxi_tags ) do
 				// should we Run a check on the tag existence ? ?
 				local objBeacon = PROXI_BEACONS[tag]
-				if objBeacon[step] and objBeacon:IsEnabled() then
-					objBeacon[step]( objBeacon, ent )
+				if objBeacon[sStep] and objBeacon:IsEnabled() then
+					objBeacon[sStep]( objBeacon, ent )
 					
 				end
 				
 			end
+			
+		end
+		
+	end
+	
+end
+
+function proxi:DebugStandAloneOps( sStep )
+	for k,tag in pairs ( PROXI_STANDALONE ) do
+		local objBeacon = PROXI_BEACONS[tag]
+		if objBeacon[sStep] and objBeacon:IsEnabled() then
+			objBeacon[sStep]( objBeacon )
+			
+		end
+		
+	end
+	
+end
+
+function proxi:InitializeBeacons( )
+	for tag,objBeacon in pairs ( PROXI_BEACONS ) do
+		if objBeacon.Initialize then
+			objBeacon.Initialize( objBeacon )
 			
 		end
 		
@@ -157,10 +192,6 @@ function proxi.RegisterBeacon( objBeacon, sName )
 	end
 	function objBeacon.GetRawName( self )
 		return self.__rawname
-		
-	end
-	if objBeacon.Initialize then
-		objBeacon:Initialize()
 		
 	end
 	
