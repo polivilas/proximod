@@ -5,7 +5,7 @@ BEACON.IsStandAlone = false
 
 function BEACON:Initialize()
 	self.myMathPool = {}
-	self.myMaterial = Material( "effects/yellowflare" )
+	self.myMaterial = Material( "proxi/beacon_flare_add" )
 	self.myTexture  = surface.GetTextureID( "proxi/beacon_square_8" )
 	
 end
@@ -34,12 +34,11 @@ function BEACON:DrawUnderCircle( ent )
 	render.SetMaterial( self.myMaterial )
 	render.DrawBeam( thisMathPool.posToProj, thisMathPool.posToProj + Vector( 0, 0, 92 ), 10, 0.3, 1, Color( 255, 255, 255, 255 * cfP ) )
 	render.DrawSprite( thisMathPool.conePos, 32, 32, Color( 255, 255, 255, 255 * cfAP ) ) ////
-	--render.DrawSprite( thisMathPool.posToProj, 32, 32, Color( 255, 255, 255, 255 ) )
-	--render.DrawBeam( thisMathPool.posToProj, thisMathPool.conePos, 10, 0.3, 0.5, Color( 255, 255, 255, 255 * cfP ) )
 	
 	if thisMathPool.ratioClamped < 1 then
 		render.SetBlend( 1 - thisMathPool.ratioClamped ^ 5 )
 		if ValidEntity( ent:GetRagdollEntity() ) then
+			render.DrawBeam( thisMathPool.posToProj, ent:GetRagdollEntity():GetPos(), 10, 0.2, 0.8, Color( 255, 255, 255, 255 * cfP ) )
 			ent:GetRagdollEntity():DrawModel()
 			
 		else
@@ -58,9 +57,11 @@ function BEACON:DrawUnderCircle2D( ent )
 	local xRel, yRel = proxi:ConvertPosToRelative( thisMathPool.conePos )
 	local x, y       = proxi:ConvertRelativeToScreen( xRel, yRel )
 	
+	local teamColor = team.GetColor( ent:Team() )
+	
 	surface.SetTexture( self.myTexture )
-	surface.SetDrawColor( 0, 0, 0, 255 )
-	surface.DrawTexturedRectRotated( x, y, 12 * proxi:GetPinScale(), 12 * proxi:GetPinScale(), 45 ) ////
+	surface.SetDrawColor( teamColor )
+	surface.DrawTexturedRectRotated( x, y, 8 * proxi:GetPinScale(), 8 * proxi:GetPinScale(), 45 ) ////
 	
 	local text = tostring( ent:Nick() )
 	
@@ -70,7 +71,7 @@ function BEACON:DrawUnderCircle2D( ent )
 	y = y - yRel * hB / 2 + hB - (yRel > 0 and (yRel ^ 4 * hB * 2) or 0)
 	
 	draw.SimpleText( tostring( ent:Nick() ), "DefaultSmall", x + 1, y + 1, Color( 0, 0, 0, 128 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-	draw.SimpleText( tostring( ent:Nick() ), "DefaultSmall", x, y, Color( 255, 0, 0 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+	draw.SimpleText( tostring( ent:Nick() ), "DefaultSmall", x, y, teamColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 	
 
 end

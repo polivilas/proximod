@@ -7,7 +7,7 @@ function BEACON:Initialize()
 	self.myMathPool = {}
 	self.myMaterial = Material( "proxi/beacon_cone_rev" )
 	self.myOtherMaterial = Material( "proxi/beacon_circle" )
-	self.myBeamMaterial = Material( "effects/yellowflare" )
+	self.myBeamMaterial = Material( "proxi/beacon_flare_add" )
 	
 end
 

@@ -5,7 +5,7 @@ BEACON.IsStandAlone = false
 
 function BEACON:Initialize()
 	self.myMathPool = {}
-	self.myMaterial = Material( "effects/yellowflare" )
+	self.myMaterial = Material( "proxi/beacon_flare_add" )
 	
 end
 

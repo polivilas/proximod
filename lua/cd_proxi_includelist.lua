@@ -16,6 +16,7 @@ table.insert( ADDON_PROP, "proxi_b_default/rockets.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/bolts.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/los.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/nades.lua" )
+table.insert( ADDON_PROP, "proxi_b_default/compass.lua" )
 
 ---- Menu
 table.insert( ADDON_PROP, "cl_proxi_ctrlcolor.lua" )
