@@ -7,6 +7,26 @@
 // Utility functions                          //
 ////////////////////////////////////////////////
 
+function proxi:FamiliarizeString( stringInput )
+	local stringParts = string.Explode( "_", stringInput )
+	local stringOutput = ""
+	for k,part in pairs( stringParts ) do
+		local len = string.len( part )
+		if len == 1 then
+			stringOutput = stringOutput .. string.upper( part )
+			
+		elseif len > 1 then
+			stringOutput = stringOutput .. string.Left( string.upper( part ), 1 ) .. string.Right( part, len - 1 )
+			
+		end
+		
+		if k != #stringParts then stringOutput = stringOutput .. " " end
+		
+	end
+	return stringOutput
+	
+end
+
 function proxi:Util_CalcPowerUniform( fUniform )
 	return fUniform ^ 2, (1 - (1 - fUniform) ^ 2 )
 end

@@ -1,3 +1,9 @@
+0.103
+Added NPC, NPC LOS, and Compass for Contraptions.
+&
+Cleaned up menu.
+&
+Menu beacons are now ordered in alphabetic order.
 0.102
 Fixed a critical bug which crashes the menu (due to poor copy and paste).
 0.101

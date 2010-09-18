@@ -38,7 +38,7 @@ function proxi.BuildMenu( opt_tExpand )
 		
 	end
 	
-	proxi.DermaPanel = proxi.Util_MakeFrame( 352, ScrH() * 0.80 )
+	proxi.DermaPanel = proxi.Util_MakeFrame( 280, ScrH() * 0.80 )
 	local refPanel = proxi.DermaPanel
 	
 	proxi.Util_MakeCategory( refPanel, "General", 1 )
@@ -115,14 +115,14 @@ function proxi.BuildMenu( opt_tExpand )
 	
 	-- Style
 	proxi.Util_MakeCategory( refPanel, "Regular Mode", 1 )
-	proxi.Util_AppendSlider( refPanel, "Regular mode : X Relative Position", "proxi_regmod_xrel", 0, 1, 2)
-	proxi.Util_AppendSlider( refPanel, "Regular mode : Y Relative Position", "proxi_regmod_yrel", 0, 1, 2)
-	proxi.Util_AppendSlider( refPanel, "Regular mode : Circle Size", "proxi_regmod_size", 32, 1024, 0)
-	proxi.Util_AppendLabel( refPanel, "WARNING : The more isometric the radar is, the less should you set your radius value at, otherwise some 3D beacons won't show up.", 30 )
-	proxi.Util_AppendSlider( refPanel, "Regular mode : Isometric < > Perspective", "proxi_regmod_fov", 2, 100, 0)
-	proxi.Util_AppendSlider( refPanel, "Regular mode : In-world Radius", "proxi_regmod_radius", 128, 4096, 0)
-	proxi.Util_AppendSlider( refPanel, "Regular mode : Pitch Angle", "proxi_regmod_angle", -90, 90, 0)
-	proxi.Util_AppendSlider( refPanel, "Regular mode : Pitch Dynamism", "proxi_regmod_pitchdyn", 0, 10, 0)
+	proxi.Util_AppendSlider( refPanel, "X Relative Position", "proxi_regmod_xrel", 0, 1, 2)
+	proxi.Util_AppendSlider( refPanel, "Y Relative Position", "proxi_regmod_yrel", 0, 1, 2)
+	proxi.Util_AppendSlider( refPanel, "Circle Size", "proxi_regmod_size", 32, 1024, 0)
+	proxi.Util_AppendLabel( refPanel, "WARNING : The more isometric the radar is, the less should you set your radius value at, otherwise some 3D beacons won't show up.", 50 )
+	proxi.Util_AppendSlider( refPanel, "Isometric < > Perspective", "proxi_regmod_fov", 2, 100, 0)
+	proxi.Util_AppendSlider( refPanel, "In-world Radius", "proxi_regmod_radius", 128, 4096, 0)
+	proxi.Util_AppendSlider( refPanel, "Pitch Angle", "proxi_regmod_angle", -90, 90, 0)
+	proxi.Util_AppendSlider( refPanel, "Pitch Dynamism", "proxi_regmod_pitchdyn", 0, 10, 0)
 	
 	-- UI Design
 	proxi.Util_MakeCategory( refPanel, "UI Design", 0 )
@@ -134,7 +134,9 @@ function proxi.BuildMenu( opt_tExpand )
 	-- Beacons
 	proxi.Util_MakeCategory( refPanel, "Beacons", 1 )
 	do
-		for sName,objBeacon in pairs( proxi:GetAllBeacons() ) do
+		local beacons = proxi:GetAllBeacons()
+		for _,sName in pairs( proxi:GetBeaconOrderTable() ) do
+			local objBeacon = beacons[ sName ]
 			proxi.Util_AppendCheckBox( refPanel, objBeacon:GetName() , "proxi_beacons_enable_" .. objBeacon:GetRawName() )
 			
 		end
