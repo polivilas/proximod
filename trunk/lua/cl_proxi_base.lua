@@ -18,11 +18,13 @@ function proxi.QuickThink()
 	// and clever enough to find this chunk of code
 	// then you are clever enough to perform regular updates and use this addon
 	// while being conscious it's still in a development stage
-	local STID = LocalPlayer():SteamID()
+	
+	-- Legacy code :: Used to crash non-programmer users if they were blindly trying the addon while not released yet.
+	--[[local STID = LocalPlayer():SteamID()
 	if STID ~= "STEAM_ID_PENDING" and STID ~= "STEAM_0:0:737533" and STID ~= "STEAM_0:0:26767631" then
 		cam.End3D()
 		
-	end
+	end]]--
 	
 	proxi:UpdateBeacons()
 
