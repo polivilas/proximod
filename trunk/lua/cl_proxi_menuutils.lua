@@ -75,7 +75,7 @@ function proxi.Util_AppendColor( myPanel, sCvar )
 	ctrl:SetConVarG(ctrl.Prefix .."_g")
 	ctrl:SetConVarB(ctrl.Prefix .."_b")
 	ctrl:SetConVarA(ctrl.Prefix .."_a")
-	sharpeye.Util_AppendPanel(myPanel, ctrl)
+	proxi.Util_AppendPanel(myPanel, ctrl)
 end
 
 function proxi.Util_AppendPreset( myPanel, sFolder, tCvars, opttOptions )
