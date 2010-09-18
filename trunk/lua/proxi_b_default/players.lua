@@ -7,6 +7,7 @@ function BEACON:Initialize()
 	self.myMathPool = {}
 	self.myMaterial = Material( "proxi/beacon_flare_add" )
 	self.myTexture  = surface.GetTextureID( "proxi/beacon_square_8" )
+	self.myTriangle    = surface.GetTextureID( "proxi/beacon_triangle" )
 	
 end
 
@@ -24,6 +25,8 @@ function BEACON:PerformMath( ent )
 	proxi:ProjectPosition( thisMathPool, ent:GetPos() )		
 	proxi:GetFalloff( thisMathPool, 256 )
 	proxi:GetConeProjectedPosition( thisMathPool )
+	
+	self.zLocalPos = LocalPlayer():GetPos().z
 	
 end
 
@@ -59,9 +62,17 @@ function BEACON:DrawUnderCircle2D( ent )
 	
 	local teamColor = team.GetColor( ent:Team() )
 	
-	surface.SetTexture( self.myTexture )
+	local relZ = (ent:GetPos().z - self.zLocalPos)
+	local isShift = math.abs( relZ ) > 48
+	if isShift then
+		surface.SetTexture( self.myTriangle )
+		
+	else
+		surface.SetTexture( self.myTexture )
+		
+	end
 	surface.SetDrawColor( teamColor )
-	surface.DrawTexturedRectRotated( x, y, 8 * proxi:GetPinScale(), 8 * proxi:GetPinScale(), 45 ) ////
+	surface.DrawTexturedRectRotated( x, y, 14 * proxi:GetPinScale(), 14 * proxi:GetPinScale(), isShift and ((relZ > 0) and 0 or 180) or 45) ////
 	
 	local text = tostring( ent:Nick() )
 	

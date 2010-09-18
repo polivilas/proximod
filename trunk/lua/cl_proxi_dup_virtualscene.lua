@@ -94,7 +94,9 @@ function proxi:RecomC()
 	
 	self.dat.view_data.pos = nil
 	self.dat.view_data.ang = nil
-	self.dat.view_data.ang_func = function() return Angle( proxi.GetVar("proxi_regmod_angle"), EyeAngles().y, 0 ) end
+	self.dat.view_data.ang_func = function()
+		return Angle( proxi.GetVar("proxi_regmod_angle") + (proxi.GetVar("proxi_regmod_pitchdyn") / 10) * EyeAngles().p, EyeAngles().y, 0 )
+	end
 	self.dat.view_data.radius_const = 512
 	self.dat.view_data.fov_const = 10
 	self.dat.view_data.drawx = 12
