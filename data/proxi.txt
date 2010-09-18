@@ -1,3 +1,5 @@
+0.102
+Fixed a critical bug which crashes the menu (due to poor copy and paste).
 0.101
 Made available for betatesting.
 0.1
