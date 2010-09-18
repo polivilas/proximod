@@ -43,7 +43,9 @@ function proxi:UpdateBeacons()
 	for _,ent in pairs( allEnts ) do
 		local couldTag = self:TagEntity( ent )
 		
-		-- couldTag can be a BOOLEAN or NIL :: if (couldTag == true) DOES NOT EQUAL TO if (couldtag)
+		-- couldTag can be a BOOLEAN or NIL :: "if (couldTag == true)" DOES NOT EQUAL TO "if (couldtag)"
+		-- Actually, if there were only "(clouldTag)" it could work.
+		-- If there is a case where I need "coundTag == false" then do "couldTag == false" and not "not couldTag"
 		if couldTag == true then
 			table.insert( PROXI_TaggedEntities, ent )
 			

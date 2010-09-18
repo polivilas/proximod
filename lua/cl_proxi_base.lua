@@ -14,18 +14,6 @@ function proxi:IsEnabled()
 end
 
 function proxi.QuickThink()
-	// No stupid code obfuscation, if you were clever enough to find the SVN adress
-	// and clever enough to find this chunk of code
-	// then you are clever enough to perform regular updates and use this addon
-	// while being conscious it's still in a development stage
-	
-	-- Legacy code :: Used to crash non-programmer users if they were blindly trying the addon while not released yet.
-	--[[local STID = LocalPlayer():SteamID()
-	if STID ~= "STEAM_ID_PENDING" and STID ~= "STEAM_0:0:737533" and STID ~= "STEAM_0:0:26767631" then
-		cam.End3D()
-		
-	end]]--
-	
 	proxi:UpdateBeacons()
 
 end
@@ -55,11 +43,12 @@ function proxi.Mount()
 	
 	proxi.Util_AppendCvar( proxi.cvarGroups.core, "enable", "1")
 	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "xrel", "0.2")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "yrel", "0.8")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "size", "128")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "fov", "10")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "radius", "512")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "angle", "35")
+	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "yrel", "0.2")
+	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "size", "172")
+	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "fov", "45")
+	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "radius", "2048")
+	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "angle", "50")
+	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "pitchdyn", "2")
 	proxi.Util_AppendCvar( proxi.cvarGroups.uidesign, "ringcolor", {147, 201, 224, 255}, "color" )
 	proxi.Util_AppendCvar( proxi.cvarGroups.uidesign, "backcolor", {32, 37, 43, 128}, "color" )
 	

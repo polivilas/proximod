@@ -33,9 +33,9 @@ function BEACON:DrawUnderCircle( ent )
 	render.SetMaterial( self.myMaterial )
 	
 	for i=1,10 do
-		render.DrawBeam( thisMathPool.conePos, thisMathPool.conePos - ent:GetVelocity() + VectorRand() * 128, 32, 0.5, 1, Color( 255, 0, 0, 128 ) )
+		render.DrawBeam( thisMathPool.conePos, thisMathPool.conePos - ent:GetVelocity() + VectorRand() * 128, 32, 0.5, 1, Color( 255, 0, 0, 128 * cfP ) )
 	end
-	render.DrawSprite( thisMathPool.conePos, 256 + 128 * math.sin( CurTime() * math.pi * 2 * 3 ), 256 + 128 * math.sin( CurTime() * math.pi * 2 * 3 ), Color( 255, 0, 0, 255 ) ) ////
+	render.DrawSprite( thisMathPool.conePos, 256 + 128 * math.sin( CurTime() * math.pi * 2 * 3 ), 256 + 128 * math.sin( CurTime() * math.pi * 2 * 3 ), Color( 255, 0, 0, 255 * cfP ) ) ////
 	
 end
 
