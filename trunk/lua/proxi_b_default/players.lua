@@ -64,6 +64,7 @@ function BEACON:DrawUnderCircle2D( ent )
 	
 	local relZ = (ent:GetPos().z - self.zLocalPos)
 	local isShift = math.abs( relZ ) > 48
+	local iSize = (isShift and 20 or 14) * proxi:GetPinScale()
 	if isShift then
 		surface.SetTexture( self.myTriangle )
 		
@@ -72,7 +73,7 @@ function BEACON:DrawUnderCircle2D( ent )
 		
 	end
 	surface.SetDrawColor( teamColor )
-	surface.DrawTexturedRectRotated( x, y, 14 * proxi:GetPinScale(), 14 * proxi:GetPinScale(), isShift and ((relZ > 0) and 0 or 180) or 45) ////
+	surface.DrawTexturedRectRotated( x, y, iSize, iSize, isShift and ((relZ > 0) and 0 or 180) or 45) ////
 	
 	local text = tostring( ent:Nick() )
 	
@@ -81,8 +82,8 @@ function BEACON:DrawUnderCircle2D( ent )
 	x = x - xRel * wB / 2
 	y = y - yRel * hB / 2 + hB - (yRel > 0 and (yRel ^ 4 * hB * 2) or 0)
 	
-	draw.SimpleText( tostring( ent:Nick() ), "DefaultSmall", x + 1, y + 1, Color( 0, 0, 0, 128 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-	draw.SimpleText( tostring( ent:Nick() ), "DefaultSmall", x, y, teamColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+	draw.SimpleText( text, "DefaultSmall", x + 1, y + 1, Color( 0, 0, 0, 128 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+	draw.SimpleText( text, "DefaultSmall", x, y, teamColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 	
 
 end

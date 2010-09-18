@@ -11,6 +11,7 @@
 
 local PROXI_BEACONS    = {}
 local PROXI_STANDALONE = {}
+local PROXI_BEACONORDER = {}
 
 local PROXI_LastQueryBeacons = 0
 local PROXI_BeaconQueryDelay = 0.1 -- Seconds.
@@ -164,6 +165,17 @@ function proxi:InitializeBeacons( )
 	
 end
 
+function proxi:OrderBeaconTable()
+	table.sort( PROXI_BEACONORDER, function( a, b )
+		return PROXI_BEACONS[a]:GetName() < PROXI_BEACONS[b]:GetName()
+		
+	end )
+	
+end
+
+function proxi:GetBeaconOrderTable()
+	return PROXI_BEACONORDER
+end
 
 -- LIBVAR
 function proxi.RegisterBeacon( objBeacon, sName )
@@ -182,6 +194,7 @@ function proxi.RegisterBeacon( objBeacon, sName )
 	objBeacon.Name = objBeacon.Name or ("<" .. sName .. ">")
 	objBeacon.__rawname = sName
 	PROXI_BEACONS[sName] = objBeacon
+	table.insert( PROXI_BEACONORDER, sName )
 	-- REPEAT : Won't make a metatable because there are so few base functions
 	proxi.CreateVar("proxi_beacons_enable_" .. sName, (objBeacon.DefaultOn or false) and 1 or 0)
 	function objBeacon.IsEnabled( self )
@@ -196,5 +209,7 @@ function proxi.RegisterBeacon( objBeacon, sName )
 		return self.__rawname
 		
 	end
+	
+	proxi:OrderBeaconTable()
 	
 end
