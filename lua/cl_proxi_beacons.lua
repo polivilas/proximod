@@ -307,15 +307,17 @@ function proxi.RegisterBeacon( objBeacon, sName )
 
 	if not PROXI__CALLBACK_FUNC[ "proxi_beacons_enable_" .. sName ] then
 		cvars.AddChangeCallback( "proxi_beacons_enable_" .. sName , function( sCvar, prev, new )
+			local name = string.gsub( sCvar, "proxi_beacons_enable_", "" )
+			
 			if not proxi then return end
-			if not PROXI_BEACONS or not PROXI_BEACONS[ sName ]  then return end
+			if not proxi.GetAllBeacons or not proxi:GetAllBeacons() or not proxi:GetAllBeacons()[ sName ]  then return end
 			if (tonumber( new ) <= 0 and tonumber( prev ) <= 0) or (tonumber( new ) > 0 and tonumber( prev ) > 0) then return end
 			
 			if tonumber( new ) > 0 then
-				PROXI_BEACONS[ sName ]:Mount()
+				proxi:GetAllBeacons()[ sName ]:Mount()
 			
 			else
-				PROXI_BEACONS[ sName ]:Unmount()
+				proxi:GetAllBeacons()[ sName ]:Unmount()
 				
 			end
 			
