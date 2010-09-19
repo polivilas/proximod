@@ -14,7 +14,7 @@ function proxi:LoadDefaultBeacons()
 		BEACON.DefaultOn    = true
 		BEACON.IsStandAlone = false
 		
-		function BEACON:Initialize()
+		function BEACON:Mount()
 			self.myMathPool = {}
 			self.myMaterial = Material( "effects/yellowflare" )
 			
@@ -72,7 +72,7 @@ function proxi:LoadDefaultBeacons()
 		BEACON.DefaultOn    = true
 		BEACON.IsStandAlone = false
 		
-		function BEACON:Initialize()
+		function BEACON:Mount()
 			self.myMathPool = {}
 			self.myMaterial = Material( "effects/yellowflare" )
 			
@@ -139,7 +139,7 @@ function proxi:LoadDefaultBeacons()
 		BEACON.DefaultOn    = true
 		BEACON.IsStandAlone = false
 		
-		function BEACON:Initialize()
+		function BEACON:Mount()
 			self.myMathPool = {}
 			self.myMaterial = Material( "effects/yellowflare" )
 			
@@ -220,7 +220,7 @@ function proxi:LoadDefaultBeacons()
 		BEACON.DefaultOn    = true
 		BEACON.IsStandAlone = false
 		
-		function BEACON:Initialize()
+		function BEACON:Mount()
 			self.myMathPool = {}
 			self.myMaterial = Material( "effects/yellowflare" )
 			
@@ -289,7 +289,7 @@ function proxi:LoadDefaultBeacons()
 		BEACON.DefaultOn    = true
 		BEACON.IsStandAlone = false
 		
-		function BEACON:Initialize()
+		function BEACON:Mount()
 			self.myMathPool = {}
 			self.myMaterial = Material( "effects/yellowflare" )
 			
@@ -329,7 +329,7 @@ function proxi:LoadDefaultBeacons()
 		BEACON.DefaultOn    = true
 		BEACON.IsStandAlone = false
 		
-		function BEACON:Initialize()
+		function BEACON:Mount()
 			self.myMathPool = {}
 			self.myMaterial = Material( "effects/yellowflare" )
 			

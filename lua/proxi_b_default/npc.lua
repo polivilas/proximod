@@ -3,7 +3,7 @@ BEACON.Name         = "NPCs"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
-function BEACON:Initialize()
+function BEACON:Mount()
 	self.myMathPool = {}
 	self.myTexture     = surface.GetTextureID( "proxi/beacon_square_8" )
 	self.myTriangle    = surface.GetTextureID( "proxi/beacon_triangle" )
@@ -50,7 +50,7 @@ function BEACON:DrawUnderCircle2D( ent )
 	local x, y       = proxi:ConvertRelativeToScreen( xRel, yRel )
 	
 	local relZ = (ent:GetPos().z - self.zLocalPos)
-	local isShift = math.abs( relZ ) > 48
+	local isShift = math.abs( relZ ) > 100
 	local iSize = (isShift and 20 or 14) * proxi:GetPinScale()
 	if isShift then
 		surface.SetTexture( self.myTriangle )

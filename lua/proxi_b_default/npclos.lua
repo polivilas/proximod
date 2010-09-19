@@ -3,7 +3,7 @@ BEACON.Name         = "NPC LOS"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
-function BEACON:Initialize()
+function BEACON:Mount()
 	self.myMathPool = {}
 	self.myMaterial = Material( "proxi/beacon_cone_rev" )
 	self.myOtherMaterial = Material( "proxi/beacon_circle" )
@@ -12,7 +12,7 @@ function BEACON:Initialize()
 end
 
 function BEACON:ShouldTag( entity )
-	return entity:IsNPC() and not entity:GetClass() ~= "npc_rollermine"
+	return entity:IsNPC() and entity:GetClass() ~= "npc_rollermine"
 	
 end
 function BEACON:DrawUnderCircle( ent )
