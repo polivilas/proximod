@@ -3,7 +3,7 @@ BEACON.Name         = "NPCs"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
-function BEACON:Mount()
+function BEACON:Load()
 	self.myMathPool = {}
 	self.myTexture     = surface.GetTextureID( "proxi/beacon_square_8" )
 	self.myTriangle    = surface.GetTextureID( "proxi/beacon_triangle" )

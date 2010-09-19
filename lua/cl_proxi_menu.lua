@@ -137,7 +137,7 @@ function proxi.BuildMenu( opt_tExpand )
 		local beacons = proxi:GetAllBeacons()
 		for _,sName in pairs( proxi:GetBeaconOrderTable() ) do
 			local objBeacon = beacons[ sName ]
-			proxi.Util_AppendCheckBox( refPanel, objBeacon:GetName() , "proxi_beacons_enable_" .. objBeacon:GetRawName() )
+			proxi.Util_AppendCheckBox( refPanel, objBeacon:GetDisplayName() , "proxi_beacons_enable_" .. objBeacon:GetRawName() )
 			
 		end
 		

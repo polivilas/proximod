@@ -7,6 +7,15 @@
 // Base                                       //
 ////////////////////////////////////////////////
 
+-- Added due to callback problems with the cvars lib.
+if not PROXI__CALLBACK_FUNC then
+	PROXI__CALLBACK_FUNC = {}
+	
+end
+
+
+
+
 function proxi:IsEnabled()
 	-- Security for external apps.
 	return (self or proxi).GetVar("proxi_core_enable") > 0
@@ -54,6 +63,25 @@ function proxi.Mount()
 	
 	for sSubFix,tCvarGroup in pairs( proxi.cvarGroups ) do
 		proxi.Util_BuildCvars( tCvarGroup, "proxi_" .. sSubFix .. "_" )
+		
+	end
+	
+	if not PROXI__CALLBACK_FUNC["proxi_core_enable"] then
+		cvars.AddChangeCallback( "proxi_core_enable" , function( sCvar, prev, new )
+			if not proxi then return end
+			if (tonumber( new ) <= 0 and tonumber( prev ) <= 0) or (tonumber( new ) > 0 and tonumber( prev ) > 0) then return end
+			
+			if tonumber( new ) > 0 then
+				proxi:MountBeacons()
+			
+			else
+				proxi:UnmountBeacons()
+				
+			end
+			
+		end)
+		
+		PROXI__CALLBACK_FUNC["proxi_core_enable"] = true
 		
 	end
 	

@@ -3,7 +3,7 @@ BEACON.Name         = "Compass for Contraptions"
 BEACON.DefaultOn    = false
 BEACON.IsStandAlone = true
 
-function BEACON:Mount()
+function BEACON:Load()
 	local baseAngle = Angle(0, 0, 0)
 	
 	self.myNormals = {}

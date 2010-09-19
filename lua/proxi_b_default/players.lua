@@ -3,7 +3,7 @@ BEACON.Name         = "Players"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
-function BEACON:Mount()
+function BEACON:Load()
 	self.myMathPool = {}
 	self.myMaterial = Material( "proxi/beacon_flare_add" )
 	self.myTexture  = surface.GetTextureID( "proxi/beacon_square_8" )

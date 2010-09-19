@@ -1,16 +1,16 @@
 local BEACON = {}
-BEACON.Name         = "Props"
+BEACON.Name         = "Physical Props"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
-function BEACON:Mount()
+function BEACON:Load()
 	self.myMathPool = {}
 	self.myMaterial = Material( "proxi/beacon_flare_add" )
 	
 end
 
 function BEACON:ShouldTag( entity )
-	return string.find( entity:GetClass(), "prop_" )
+	return string.find( entity:GetClass(), "prop_physics" ) or string.find( entity:GetClass(), "prop_ragdoll" )
 	
 end
 
@@ -47,4 +47,4 @@ function BEACON:DrawUnderCircle( ent )
 	
 end
 
-proxi.RegisterBeacon( BEACON, "props" )
+proxi.RegisterBeacon( BEACON, "physprops" )

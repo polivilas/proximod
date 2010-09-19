@@ -19,6 +19,8 @@ local PROXI_BeaconQueryDelay = 0.1 -- Seconds.
 local PROXI_TaggedEntities = {}
 
 function proxi:ResetAllTags()
+	//debug.Trace()
+	//print( "Reset all tags." )
 	PROXI_TaggedEntities = {}
 	proxi:RemoveAllPhysicalTags()
 	
@@ -155,9 +157,11 @@ function proxi:DebugStandAloneOps( sStep )
 end
 
 function proxi:MountBeacons( )
+	self:ResetAllTags()
+	
 	for tag,objBeacon in pairs ( PROXI_BEACONS ) do
-		if objBeacon.Mount then
-			objBeacon.Mount( objBeacon )
+		if objBeacon:IsEnabled( ) then
+			objBeacon:Mount( true )
 			
 		end
 		
@@ -165,9 +169,19 @@ function proxi:MountBeacons( )
 	
 end
 
+function proxi:UnmountBeacons( )
+	self:ResetAllTags()
+	
+	for tag,objBeacon in pairs ( PROXI_BEACONS ) do
+		objBeacon:Unmount( true )
+		
+	end
+	
+end
+
 function proxi:OrderBeaconTable()
 	table.sort( PROXI_BEACONORDER, function( a, b )
-		return PROXI_BEACONS[a]:GetName() < PROXI_BEACONS[b]:GetName()
+		return (PROXI_BEACONS[a]:GetBarnstar() ~= PROXI_BEACONS[b]:GetBarnstar()) and (PROXI_BEACONS[a]:GetDisplayName() < PROXI_BEACONS[b]:GetDisplayName()) or (PROXI_BEACONS[a]:GetBarnstar() > PROXI_BEACONS[b]:GetBarnstar())
 		
 	end )
 	
@@ -177,11 +191,85 @@ function proxi:GetBeaconOrderTable()
 	return PROXI_BEACONORDER
 end
 
+
+
+local BEACON = {}
+
+function BEACON:IsEnabled( )
+	return proxi.GetVar("proxi_beacons_enable_" .. self._rawname) > 0
+	
+end
+
+function BEACON:GetDisplayName( )
+	return self.Name
+	
+end
+
+function BEACON:GetRawName( )
+	return self._rawname
+	
+end
+
+function BEACON:GetBarnstar()
+	return proxi.GetVar( "proxi_beacons_barnstar_" .. self._rawname )
+	
+end
+
+function BEACON:IsMounted()
+	return self._IsMounted
+end
+
+
+
+
+function BEACON:Mount( optbNoTagReset )
+	if self._IsMounted then return false end
+	
+	if self.Load then
+		local bOkay, strErr = pcall(function() self:Load() end)
+		if not bOkay then Error(" > " .. PROXI_NAME .. " MountPlugin ERROR [".. self._rawname .."] : ".. strErr) end
+	end
+	
+	for hookName, func in pairs(self.Hooks) do
+		hook.Add( hookName , "proxi_" .. self._rawname .. "_" .. hookName , func )
+		if PROXI_DEBUG then print(PROXI_NAME .. " >> Hooked " .. "inscript_" .. self._rawname .. "_" .. hookName ..".") end
+		
+	end
+	
+	self._IsMounted = true
+	
+	if not optbNoTagReset then proxi:ResetAllTags() end
+	
+end
+
+function BEACON:Unmount( optbNoTagReset )
+	if not self._IsMounted then return false end
+	
+	for hookName, func in pairs(self.Hooks) do
+		hook.Remove( hookName , "proxi_" .. self._rawname .. "_" .. hookName)
+	end
+	
+	if self.Unload then
+		local bOkay, strErr = pcall(function() self:Unload() end)
+		if not bOkay then ErrorNoHalt(" > " .. INSCRIPT_NAME .. " UnmountPlugin ERROR [".. self._rawname .."] : ".. strErr) end
+		
+	end
+	
+	self._IsMounted = false
+	
+	if not optbNoTagReset then proxi:ResetAllTags() end
+end
+
+local proxi_beacon_meta = {__index=BEACON}
+
+
+
 -- LIBVAR
 function proxi.RegisterBeacon( objBeacon, sName )
 	if not objBeacon or not sName then return end
 	sName = string.lower( sName )
-	if string.find( sName, " " ) or PROXI_BEACONS[sName] then return end
+	if string.find( sName, " " ) or string.find( sName, "_" ) or PROXI_BEACONS[sName] then return end
+	
 	objBeacon.IsStandAlone = objBeacon.IsStandAlone or false
 	if objBeacon.IsStandAlone then
 		table.insert(PROXI_STANDALONE, sName)
@@ -191,24 +279,52 @@ function proxi.RegisterBeacon( objBeacon, sName )
 		
 	end
 	
+	objBeacon._IsMounted = false
+	
 	objBeacon.Name = objBeacon.Name or ("<" .. sName .. ">")
-	objBeacon.__rawname = sName
+	objBeacon._rawname = sName
+	
+	objBeacon.Hooks = {}
+	if objBeacon.HOOK then		
+		for name, func in pairs( objBeacon.HOOK ) do
+			if type(func) == "function" then
+				objBeacon.Hooks[name] = function(...)
+					if not proxi or not proxi.IsEnabled or not proxi.IsEnabled() then return end
+					return func( objBeacon, ... )
+					
+				end
+			end
+		end
+		
+	end
+	
 	PROXI_BEACONS[sName] = objBeacon
 	table.insert( PROXI_BEACONORDER, sName )
-	-- REPEAT : Won't make a metatable because there are so few base functions
+	
 	proxi.CreateVar("proxi_beacons_enable_" .. sName, (objBeacon.DefaultOn or false) and 1 or 0)
-	function objBeacon.IsEnabled( self )
-		return proxi.GetVar("proxi_beacons_enable_" .. self.__rawname) > 0
-		
+	proxi.CreateVar("proxi_beacons_barnstar_" .. sName, "0", true, false)
+	
+
+	if not PROXI__CALLBACK_FUNC[ "proxi_beacons_enable_" .. sName ] then
+		cvars.AddChangeCallback( "proxi_beacons_enable_" .. sName , function( sCvar, prev, new )
+			if not proxi then return end
+			if not PROXI_BEACONS or not PROXI_BEACONS[ sName ]  then return end
+			if (tonumber( new ) <= 0 and tonumber( prev ) <= 0) or (tonumber( new ) > 0 and tonumber( prev ) > 0) then return end
+			
+			if tonumber( new ) > 0 then
+				PROXI_BEACONS[ sName ]:Mount()
+			
+			else
+				PROXI_BEACONS[ sName ]:Unmount()
+				
+			end
+			
+		end)
+		PROXI__CALLBACK_FUNC[ "proxi_beacons_enable_" .. sName ] = true
+	
 	end
-	function objBeacon.GetName( self )
-		return self.Name
-		
-	end
-	function objBeacon.GetRawName( self )
-		return self.__rawname
-		
-	end
+	
+	setmetatable(objBeacon, proxi_beacon_meta)
 	
 	proxi:OrderBeaconTable()
 	
