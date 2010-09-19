@@ -44,7 +44,7 @@ function BEACON:DrawUnderCircle2D( ent )
 		
 		local x, y       = proxi:ConvertPosToScreen( thisMathPool.conePos )
 		
-		obj[ 3 ].a = (1 - ((CurTime() - obj[ 5 ]) / self.beaconTime) ^ 2) * 255
+		obj[ 3 ].a = (1 - ((CurTime() - obj[ 5 ]) / self.beaconTime) ^ 2) * 128
 		
 		local iSize = 24 * proxi:GetPinScale() * (1 + ((CurTime() - obj[ 5 ]) * 1.5) % 1)
 		surface.SetTexture( self.myTriangle )

@@ -181,7 +181,7 @@ end
 
 function proxi:OrderBeaconTable()
 	table.sort( PROXI_BEACONORDER, function( a, b )
-		return (PROXI_BEACONS[a]:GetBarnstar() ~= PROXI_BEACONS[b]:GetBarnstar()) and (PROXI_BEACONS[a]:GetDisplayName() < PROXI_BEACONS[b]:GetDisplayName()) or (PROXI_BEACONS[a]:GetBarnstar() > PROXI_BEACONS[b]:GetBarnstar())
+		return (PROXI_BEACONS[a]:GetBarnstar() == PROXI_BEACONS[b]:GetBarnstar()) and (PROXI_BEACONS[a]:GetDisplayName() < PROXI_BEACONS[b]:GetDisplayName()) or (PROXI_BEACONS[a]:GetBarnstar() > PROXI_BEACONS[b]:GetBarnstar())
 		
 	end )
 	
