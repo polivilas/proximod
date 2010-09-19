@@ -3,7 +3,7 @@ BEACON.Name         = "Players"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
-function BEACON:Initialize()
+function BEACON:Mount()
 	self.myMathPool = {}
 	self.myMaterial = Material( "proxi/beacon_flare_add" )
 	self.myTexture  = surface.GetTextureID( "proxi/beacon_square_8" )
@@ -61,9 +61,10 @@ function BEACON:DrawUnderCircle2D( ent )
 	local x, y       = proxi:ConvertRelativeToScreen( xRel, yRel )
 	
 	local teamColor = team.GetColor( ent:Team() )
+	local ratio = 1
 	
 	local relZ = (ent:GetPos().z - self.zLocalPos)
-	local isShift = math.abs( relZ ) > 48
+	local isShift = math.abs( relZ ) > 100
 	local iSize = (isShift and 20 or 14) * proxi:GetPinScale()
 	if isShift then
 		surface.SetTexture( self.myTriangle )
@@ -82,7 +83,12 @@ function BEACON:DrawUnderCircle2D( ent )
 	x = x - xRel * wB / 2
 	y = y - yRel * hB / 2 + hB - (yRel > 0 and (yRel ^ 4 * hB * 2) or 0)
 	
-	draw.SimpleText( text, "DefaultSmall", x + 1, y + 1, Color( 0, 0, 0, 128 ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+	if ent == LocalPlayer() then
+		ratio = 1 - (1 - thisMathPool.ratioClamped) ^ 3
+		teamColor.a = 255 * ratio
+	end
+	
+	draw.SimpleText( text, "DefaultSmall", x + 1, y + 1, Color( 0, 0, 0, 128 * ratio ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 	draw.SimpleText( text, "DefaultSmall", x, y, teamColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 	
 

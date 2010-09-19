@@ -3,7 +3,7 @@ BEACON.Name         = "Player LOS"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
-function BEACON:Initialize()
+function BEACON:Mount()
 	self.myMathPool = {}
 	self.myMaterial = Material( "proxi/beacon_cone_rev" )
 	self.myOtherMaterial = Material( "proxi/beacon_circle" )

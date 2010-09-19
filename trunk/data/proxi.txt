@@ -1,3 +1,7 @@
+0.104
+Player beacon will now make the Local Player name translucent if thy's not near the center.
+&
+Added experimental Wallfinder beacon.
 0.103
 Added NPC, NPC LOS, and Compass for Contraptions.
 &

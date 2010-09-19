@@ -154,10 +154,10 @@ function proxi:DebugStandAloneOps( sStep )
 	
 end
 
-function proxi:InitializeBeacons( )
+function proxi:MountBeacons( )
 	for tag,objBeacon in pairs ( PROXI_BEACONS ) do
-		if objBeacon.Initialize then
-			objBeacon.Initialize( objBeacon )
+		if objBeacon.Mount then
+			objBeacon.Mount( objBeacon )
 			
 		end
 		

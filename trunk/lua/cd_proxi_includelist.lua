@@ -20,6 +20,7 @@ table.insert( ADDON_PROP, "proxi_b_default/compass.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/contraptioncompass.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/npc.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/npclos.lua" )
+table.insert( ADDON_PROP, "proxi_b_default/wallfinder.lua" )
 
 ---- Menu
 table.insert( ADDON_PROP, "cl_proxi_ctrlcolor.lua" )

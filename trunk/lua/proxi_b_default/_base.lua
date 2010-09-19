@@ -3,7 +3,7 @@ BEACON.Name         = "<Base friendly name>"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
-function BEACON:Initialize()
+function BEACON:Mount()
 end
 
 function BEACON:ShouldTag( entity )
