@@ -3,7 +3,7 @@ BEACON.Name         = "NPC LOS"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
-function BEACON:Mount()
+function BEACON:Load()
 	self.myMathPool = {}
 	self.myMaterial = Material( "proxi/beacon_cone_rev" )
 	self.myOtherMaterial = Material( "proxi/beacon_circle" )

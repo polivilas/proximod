@@ -1,3 +1,13 @@
+0.11
+Added end-user hidden Mount system.
+&
+Beacons are now part of an Inscript-like architecture.
+&
+Added Callbacks on Enable global and Beacon enable variables.
+&
+Added Chat beacon (The first Event beacon).
+&
+Changed Wallfinder to perform scans in a triform.
 0.104
 Player beacon will now make the Local Player name translucent if thy's not near the center.
 &

@@ -3,13 +3,14 @@ BEACON.Name         = "Wallfinder v1 (in development)"
 BEACON.DefaultOn    = false
 BEACON.IsStandAlone = true
 
-function BEACON:Mount()
+function BEACON:Load()
 	self.myMaterial = Material( "proxi/beacon_flare_add" )
 	
-	self.iTracesPerFrame  = 2
+	self.iTracesPerFrame  = 3
+	self.iGap  = 1/3
 	
 	self.iRevAngle  = 0
-	self.iRevolution = 90
+	self.iRevolution = 120
 	
 	self.tWalls = {}
 	self.iWall  = 1
@@ -24,6 +25,7 @@ function BEACON:Mount()
 	self.traceData.mask = CONTENTS_SOLID
 	self.traceData.filter = nil
 	self.traceangle = Angle( 0, 0, 0 )
+	self.radius = 0
 	
 	self.traceRes = {}
 	
@@ -34,14 +36,14 @@ end
 function BEACON:PerformMath( )
 	for iTraceNum = 1, self.iTracesPerFrame do
 		local CVD = proxi:GetCurrentViewData()
-		local radius = CVD.radius_const
+		self.radius = CVD.radius_const * 1.5
 		self.traceData.start = LocalPlayer():GetShootPos()
 		self.traceangle.y = ( self.iRevAngle / self.iRevolution ) * 360
-		self.traceData.endpos = self.traceData.start + self.traceangle:Forward() * radius
+		self.traceData.endpos = self.traceData.start + self.traceangle:Forward() * self.radius
 		
 		self.traceRes = util.TraceLine( self.traceData )
 		if self.traceRes.Hit then
-			local crossMul = self.traceRes.HitNormal:Cross( self.upNorm ) * radius * 0.1
+			local crossMul = self.traceRes.HitNormal:Cross( self.upNorm ) * self.radius * 0.1
 			self.tWalls[ self.iWall ][1] = self.traceRes.HitPos + crossMul
 			self.tWalls[ self.iWall ][2] = self.traceRes.HitPos - crossMul
 			
@@ -54,6 +56,7 @@ function BEACON:PerformMath( )
 		end
 		
 		--Keep the following at the end.
+		self.iRevAngle = self.iRevAngle + self.iRevolution * self.iGap
 		self.iRevAngle = (self.iRevAngle + 1) % self.iRevolution
 		
 	end
@@ -61,7 +64,11 @@ function BEACON:PerformMath( )
 end
 
 function BEACON:DrawUnderCircle( )
-	render.DrawBeam( self.traceData.start, self.traceData.endpos, 64, 0.5, 1, Color( 192, 128, 255, 128 ) )
+	for i = 1, self.iTracesPerFrame do
+		render.DrawBeam( self.traceData.start, self.traceData.start + self.traceangle:Forward() * self.radius, 64, 0.5, 1, Color( 192, 128, 255, 64 ) )
+		self.traceangle.y = self.traceangle.y - (1 / self.iRevolution) - self.iGap * 360
+		
+	end
 	
 	render.SetMaterial( self.myMaterial )
 	for i = 1, self.iMaxWalls do
