@@ -1,3 +1,7 @@
+0.112
+Added experimental Wallfinder with piercer (Red lines).
+&
+Changed Chat beacon opacity.
 0.111
 Fixed a bug that occurs when the script is reloaded during a single session breaking down the beacons system.
 0.11
