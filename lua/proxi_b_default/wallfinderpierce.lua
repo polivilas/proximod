@@ -81,9 +81,10 @@ function BEACON:PerformMath( )
 		
 		--Keep the following at the end.
 		self.iRevAngle = self.iRevAngle + self.iRevolution * self.iGap
-		self.iRevAngle = (self.iRevAngle + 1) % self.iRevolution
 		
 	end
+	
+	self.iRevAngle = (self.iRevAngle + 1) % self.iRevolution
 	
 end
 
