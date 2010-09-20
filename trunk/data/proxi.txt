@@ -1,3 +1,5 @@
+0.113
+Altered Wallfinder incremental.
 0.112
 Added experimental Wallfinder with piercer (Red lines).
 &
