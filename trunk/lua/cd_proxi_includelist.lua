@@ -23,6 +23,8 @@ table.insert( ADDON_PROP, "proxi_b_default/npclos.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/wallfinder.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/chat.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/wallfinderpierce.lua" )
+table.insert( ADDON_PROP, "proxi_b_default/helpersquare.lua" )
+table.insert( ADDON_PROP, "proxi_b_default/voicechat.lua" )
 
 ---- Menu
 table.insert( ADDON_PROP, "cl_proxi_ctrlcolor.lua" )
