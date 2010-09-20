@@ -76,18 +76,24 @@ function BEACON:DrawUnderCircle2D( ent )
 	surface.SetDrawColor( teamColor )
 	surface.DrawTexturedRectRotated( x, y, iSize, iSize, isShift and ((relZ > 0) and 0 or 180) or 45) ////
 	
+	
 	local text = tostring( ent:Nick() )
-	
 	surface.SetFont( "DefaultSmall" )
-	local wB, hB = surface.GetTextSize( text )
-	x = x - xRel * wB / 2
-	y = y - yRel * hB / 2 + hB - (yRel > 0 and (yRel ^ 4 * hB * 2) or 0)
 	
-	if ent == LocalPlayer() then
-		ratio = 1 - (1 - thisMathPool.ratioClamped) ^ 3
-		teamColor.a = 255 * ratio
+	if (thisMathPool.ratioClamped ~= 1) or (ent:GetFriendStatus() == "friend") then
+		local wB, hB = surface.GetTextSize( text )
+		x = x - xRel * wB / 2
+		y = y - yRel * hB / 2 + hB - (yRel > 0 and (yRel ^ 4 * hB * 2) or 0)
+		
+		if ent == LocalPlayer() then
+			ratio = 1 - (1 - thisMathPool.ratioClamped) ^ 3
+			teamColor.a = 255 * ratio
+		end
+		
+	else
+		text = string.sub( text, 1, 1 )
+		
 	end
-	
 	draw.SimpleText( text, "DefaultSmall", x + 1, y + 1, Color( 0, 0, 0, 128 * ratio ), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 	draw.SimpleText( text, "DefaultSmall", x, y, teamColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
 	

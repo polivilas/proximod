@@ -1,3 +1,11 @@
+0.114
+Player beacon now only displays the first letter of the player name if the beacon is bound to the circle.
+&
+Player beacon now only displays the full nickname of Steam Friends no matter what.
+&
+Added requested Helper Square (simple version).
+&
+Added Voice Chat beacon.
 0.113
 Altered Wallfinder incremental.
 0.112
