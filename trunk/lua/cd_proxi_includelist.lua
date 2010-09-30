@@ -27,6 +27,7 @@ table.insert( ADDON_PROP, "proxi_b_default/helpersquare.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/voicechat.lua" )
 
 ---- Menu
+table.insert( ADDON_PROP, "ProxiCollapsibleCheckbox.lua" )
 table.insert( ADDON_PROP, "cl_proxi_ctrlcolor.lua" )
 table.insert( ADDON_PROP, "cl_proxi_menuutils.lua" )
 table.insert( ADDON_PROP, "cl_proxi_changelog.lua" )

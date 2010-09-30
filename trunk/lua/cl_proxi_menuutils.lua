@@ -26,11 +26,19 @@ function proxi.Util_AppendPanel( myPanel, thisPanel )
 	
 end
 
-function proxi.Util_AppendCheckBox( myPanel, title, cvar )
 
+function proxi.Util_CreateCheckBox( title, cvar )
 	local checkbox = vgui.Create( "DCheckBoxLabel" )
 	checkbox:SetText( title )
 	checkbox:SetConVar( cvar )
+	
+	return checkbox
+	
+end
+
+function proxi.Util_AppendCheckBox( myPanel, title, cvar )
+
+	local checkbox = proxi.Util_CreateCheckBox( title, cvar )
 	
 	proxi.Util_AppendPanel( myPanel, checkbox )
 	
@@ -139,6 +147,11 @@ function proxi.Util_MakeCategory( myPanel, sTitle, bExpandDefault )
 	category.List:EnableVerticalScrollbar( false )
 	
 	return category
+end
+
+function proxi.Util_CatchCurrentCategory( myPanel )
+	return myPanel.Categories[ #myPanel.Categories ][ 1 ]
+	
 end
 
 function proxi.Util_ApplyCategories( myPanel )

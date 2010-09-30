@@ -38,8 +38,9 @@ function proxi:RegularEvaluate()
 	self.dat.view_data.drawh = size
 	self.dat.view_data.drawx = proxi.GetVar("proxi_regmod_xrel") * ScrW() - size / 2
 	self.dat.view_data.drawy = proxi.GetVar("proxi_regmod_yrel") * ScrH() - size / 2
-	self.dat.view_data.fov_const    = proxi.GetVar("proxi_regmod_fov")
-	self.dat.view_data.radius_const = proxi.GetVar("proxi_regmod_radius")
+	self.dat.view_data.foveval    = proxi.GetVar("proxi_regmod_fov")
+	self.dat.view_data.radiuseval = proxi.GetVar("proxi_regmod_radius")
+	self.dat.view_data.bypass_distance = proxi.GetVar("proxi_global_finderdistance")
 	
 end
 
@@ -48,7 +49,7 @@ end
 
 function proxi:RecomA()
 	self.dat.view_data.pos_func = function()
-		local dist = self.dat.view_data.radius_const / math.tan( math.rad( self.dat.view_data.fov_const / 2 ) )
+		local dist = self.dat.view_data.radiuseval / math.tan( math.rad( self.dat.view_data.foveval / 2 ) )
 		return EyePos() - self.dat.view_data.ang_func():Forward() * dist
 		
 	end
@@ -56,8 +57,8 @@ function proxi:RecomA()
 	self.dat.view_data.pos = nil
 	self.dat.view_data.ang = nil
 	self.dat.view_data.ang_func = function() return Angle( 90, EyeAngles().y, 0 ) end
-	self.dat.view_data.radius_const = 1024
-	self.dat.view_data.fov_const = 4
+	self.dat.view_data.radiuseval = 1024
+	self.dat.view_data.foveval = 4
 	self.dat.view_data.drawx = 12
 	self.dat.view_data.drawy = 256
 	self.dat.view_data.draww = 312
@@ -75,8 +76,8 @@ function proxi:RecomB()
 	
 	self.dat.view_data.pos = nil
 	self.dat.view_data.ang = nil
-	self.dat.view_data.radius_const = 200
-	self.dat.view_data.fov_const = LocalPlayer():GetFOV()
+	self.dat.view_data.radiuseval = 200
+	self.dat.view_data.foveval = LocalPlayer():GetFOV()
 	self.dat.view_data.drawx = (ScrW() - ScrH()) / 2
 	self.dat.view_data.drawy = 0
 	self.dat.view_data.draww = ScrH()
@@ -86,23 +87,40 @@ function proxi:RecomB()
 end
 
 function proxi:RecomC()
-	self.dat.view_data.pos_func = function()
-		local dist = self.dat.view_data.radius_const / math.tan( math.rad( self.dat.view_data.fov_const / 2 ) )
-		return EyePos() - self.dat.view_data.ang_func():Forward() * dist
+	self.dat.ang_before_pos = true
+	self.dat.view_data.referencepos_func = function( viewData )
+		return EyePos()
 		
 	end
+	self.dat.view_data.referenceang_func = function( viewData )
+		return EyeAngles()
+		
+	end
+	self.dat.view_data.pos_func = function( viewData )
+		local dist = viewData.radiuseval / math.tan( math.rad( viewData.foveval / 2 ) )
+		return viewData.referencepos - viewData.ang:Forward() * dist
+		
+	end
+	self.dat.view_data.ang_func = function( viewData )
+		return Angle( proxi.GetVar("proxi_regmod_angle") + (proxi.GetVar("proxi_regmod_pitchdyn") / 10) * viewData.referenceang.p, viewData.referenceang.y, 0 )
+	end
 	
+	self.dat.view_data.referencepos = nil
+	self.dat.view_data.referenceang = nil
 	self.dat.view_data.pos = nil
 	self.dat.view_data.ang = nil
-	self.dat.view_data.ang_func = function()
-		return Angle( proxi.GetVar("proxi_regmod_angle") + (proxi.GetVar("proxi_regmod_pitchdyn") / 10) * EyeAngles().p, EyeAngles().y, 0 )
-	end
-	self.dat.view_data.radius_const = 512
-	self.dat.view_data.fov_const = 10
-	self.dat.view_data.drawx = 12
-	self.dat.view_data.drawy = 256
-	self.dat.view_data.draww = 312
-	self.dat.view_data.drawh = 312
+
+	
+	self.dat.view_data.radiuseval_func = function( viewData ) return nil end
+	self.dat.view_data.foveval_func    = function( viewData ) return nil end
+	self.dat.view_data.radiuseval = 512
+	self.dat.view_data.foveval = 10
+	
+	self.dat.view_data.drawx  = 0
+	self.dat.view_data.drawy  = 0
+	self.dat.view_data.draww  = 0
+	self.dat.view_data.drawh  = 0
+	
 	self.dat.view_data.margin = 2^0.5
 	
 end
@@ -117,7 +135,7 @@ end
 function proxi:DoRenderVirtualScene( viewData )
 	PROXI_CURRENT_VIEWDATA = viewData
 	
-	-- We need these because Vector:ToScreen() uses the viewport as a reference, but use the raw Screen sizes from 0 to Screen Size as range of values no matter where the viewport is ou which size the viewport is
+	-- We need these because Vector:ToScreen() uses the viewport as a reference, but uses the raw Screen sizes from 0 to Screen Size as range of values no matter where the viewport is or which size the viewport is
 	viewData.raw_scrw = ScrW()
 	viewData.raw_scrh = ScrH()
 	
@@ -125,11 +143,26 @@ function proxi:DoRenderVirtualScene( viewData )
 	local iWidth, iHeight = viewData.draww, viewData.drawh
 	
 	-- Calculate actual values
-	viewData.pos = viewData.pos_func()
-	viewData.ang = viewData.ang_func()
-	viewData.baseratio = math.tan( math.rad( viewData.fov_const / 2 / viewData.margin ) )
+	viewData.referencepos = viewData.referencepos_func(viewData) or viewData.referencepos
+	viewData.referenceang = viewData.referenceang_func(viewData) or viewData.referenceang
 	
+	if self.dat.ang_before_pos then
+		viewData.ang          = viewData.ang_func(viewData)          or viewData.ang
+		viewData.pos          = viewData.pos_func(viewData)          or viewData.pos
+		
+	else
+		viewData.pos          = viewData.pos_func(viewData)          or viewData.pos
+		viewData.ang          = viewData.ang_func(viewData)          or viewData.ang
 	
+	end
+	
+	viewData.radiuseval   = viewData.radiuseval_func(viewData)   or viewData.radiuseval
+	viewData.foveval      = viewData.foveval_func(viewData)      or viewData.foveval
+	
+	viewData.baseratio = math.tan( math.rad( viewData.foveval / 2 / viewData.margin ) )
+	viewData.baseratio_nomargin = math.tan( math.rad( viewData.foveval / 2 ) )
+	
+	--self:DoFindComputeEnts( viewData )
 	
 	render.ClearStencil()
 	render.SetStencilEnable( true )
@@ -151,7 +184,7 @@ function proxi:DoRenderVirtualScene( viewData )
 	-- Comparaison : Equal : We want all operations to be drawn on the circle.
 	render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_EQUAL )
 	
-	cam.Start3D( viewData.pos, viewData.ang, viewData.fov_const, xDraw, yDraw, iWidth, iHeight )
+	cam.Start3D( viewData.pos, viewData.ang, viewData.foveval, xDraw, yDraw, iWidth, iHeight )
 		local bOkayFirst, strErrFirst = pcall( self.DoCameraMath, self, viewData )
 		if bOkayFirst then
 			local bOkay, strErr = pcall( self.DoCameraUnderScene, self, viewData )
@@ -179,7 +212,7 @@ function proxi:DoRenderVirtualScene( viewData )
 	render.SetStencilCompareFunction( STENCILCOMPARISONFUNCTION_EQUAL )
 		
 		---- Overcontents
-		cam.Start3D( viewData.pos, viewData.ang, viewData.fov_const, xDraw, yDraw, iWidth, iHeight )
+		cam.Start3D( viewData.pos, viewData.ang, viewData.foveval, xDraw, yDraw, iWidth, iHeight )
 			local bOkay, strErr = pcall( self.DoCameraOverScene, self, viewData )
 			
 		cam.End3D()

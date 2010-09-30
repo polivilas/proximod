@@ -3,6 +3,9 @@ BEACON.Name         = "Helper Square"
 BEACON.DefaultOn    = false
 BEACON.IsStandAlone = true
 
+BEACON.CanBypassDistance     = false
+BEACON.DefaultBypassDistance = false
+
 function BEACON:Load()
 	local baseAngle = Angle(0, 0, 0)
 
@@ -29,8 +32,8 @@ end
 ---- StandAlone beacons don't need ents.
 function BEACON:PerformMath( )
 	local CVD = proxi:GetCurrentViewData()
-	local refPos = EyePos() + EyeAngles():Forward() * CVD.radius_const / math.tan( math.rad( CVD.fov_const / 2 ) )
-	self.radius = CVD.radius_const * 0.3
+	local refPos = EyePos() + EyeAngles():Forward() * CVD.radiuseval / CVD.baseratio_nomargin
+	self.radius = CVD.radiuseval * 0.3
 	
 	local reference = LocalPlayer():GetPos()
 	

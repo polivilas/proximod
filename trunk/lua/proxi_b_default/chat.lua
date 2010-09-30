@@ -4,6 +4,9 @@ BEACON.Name         = "Chat"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = true
 
+BEACON.CanBypassDistance     = false
+BEACON.DefaultBypassDistance = false
+
 function BEACON:Load()
 	self.myTriangle    = surface.GetTextureID( "proxi/beacon_bigcircle_antinoy_add" )
 	

@@ -120,18 +120,18 @@ local PROXI_STEPS = {
 
 function proxi:DebugBeaconOps( tEnts, iStep )
 	local sStep = PROXI_STEPS[iStep]
-	self:DebugEntOps( sStep, tEnts )
+	self:DebugEntOps( sStep, tEnts, self:GetCurrentViewData() )
 	self:DebugStandAloneOps( sStep )
 	
 end
 
-function proxi:DebugEntOps( sStep, tEnts )
+function proxi:DebugEntOps( sStep, tEnts, viewData )
 	for k,ent in pairs( tEnts ) do
 		if ValidEntity( ent ) then
 			for l,tag in pairs( ent.__proxi_tags ) do
 				// should we Run a check on the tag existence ? ?
 				local objBeacon = PROXI_BEACONS[tag]
-				if objBeacon[sStep] and objBeacon:IsEnabled() then
+				if objBeacon[sStep] and objBeacon:IsEnabled() and not objBeacon:IsEntityOffLimits( ent, viewData ) then
 					objBeacon[sStep]( objBeacon, ent )
 					
 				end
@@ -144,7 +144,7 @@ function proxi:DebugEntOps( sStep, tEnts )
 	
 end
 
-function proxi:DebugStandAloneOps( sStep )
+function proxi:DebugStandAloneOps( sStep, viewData )
 	for k,tag in pairs ( PROXI_STANDALONE ) do
 		local objBeacon = PROXI_BEACONS[tag]
 		if objBeacon[sStep] and objBeacon:IsEnabled() then
@@ -192,6 +192,15 @@ function proxi:GetBeaconOrderTable()
 end
 
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 
 local BEACON = {}
 
@@ -210,6 +219,11 @@ function BEACON:GetRawName( )
 	
 end
 
+function BEACON:GetDescription( )
+	return self.Description or nil
+	
+end
+
 function BEACON:GetBarnstar()
 	return proxi.GetVar( "proxi_beacons_barnstar_" .. self._rawname )
 	
@@ -219,7 +233,22 @@ function BEACON:IsMounted()
 	return self._IsMounted
 end
 
+function BEACON:HasBypassDistance( )
+	return self._CanBypassDistance
+end
 
+function BEACON:IsBypassingDistance( )
+	return not self._CanBypassDistance or (proxi.GetVar( "proxi_beacons_settings_" .. self._rawname .. "__bypassdistance" ) > 0)
+end
+
+function BEACON:IsEntityOffLimits( ent, viewData, optb_forceTest )
+	if not optb_forceTest and self:IsBypassingDistance( ) then return false end
+	
+	if self.IsEntityOffLimitsCustom then
+		return self:IsEntityOffLimitsCustom( ent, viewData )
+	end
+	return (ent:GetPos() - viewData.referencepos):Length() > viewData.bypass_distance // TODO : RADIUS
+end
 
 
 function BEACON:Mount( optbNoTagReset )
@@ -232,7 +261,6 @@ function BEACON:Mount( optbNoTagReset )
 	
 	for hookName, func in pairs(self.Hooks) do
 		hook.Add( hookName , "proxi_" .. self._rawname .. "_" .. hookName , func )
-		if PROXI_DEBUG then print(PROXI_NAME .. " >> Hooked " .. "inscript_" .. self._rawname .. "_" .. hookName ..".") end
 		
 	end
 	
@@ -277,6 +305,9 @@ function proxi.RegisterBeacon( objBeacon, sName )
 	elseif not objBeacon.ShouldTag then
 		return -- ERROR : Not standalone but no way to tag either ! It's invalid !
 		
+	else
+		objBeacon._CanBypassDistance = (objBeacon.CanBypassDistance == nil) or objBeacon.CanBypassDistance
+		
 	end
 	
 	objBeacon._IsMounted = false
@@ -301,8 +332,12 @@ function proxi.RegisterBeacon( objBeacon, sName )
 	PROXI_BEACONS[sName] = objBeacon
 	table.insert( PROXI_BEACONORDER, sName )
 	
-	proxi.CreateVar("proxi_beacons_enable_" .. sName, (objBeacon.DefaultOn or false) and 1 or 0)
+	proxi.CreateVar("proxi_beacons_enable_" .. sName, (objBeacon.DefaultOn or false) and "1" or "0")
 	proxi.CreateVar("proxi_beacons_barnstar_" .. sName, "0", true, false)
+	if objBeacon._CanBypassDistance then
+		proxi.CreateVar("proxi_beacons_settings_" .. sName .. "__bypassdistance", (objBeacon.DefaultBypassDistance or false) and "1" or "0")
+	
+	end
 	
 
 	if not PROXI__CALLBACK_FUNC[ "proxi_beacons_enable_" .. sName ] then

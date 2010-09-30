@@ -3,6 +3,9 @@ BEACON.Name         = "NPC LOS"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
+BEACON.CanBypassDistance     = true
+BEACON.DefaultBypassDistance = false
+
 function BEACON:Load()
 	self.myMathPool = {}
 	self.myMaterial = Material( "proxi/beacon_cone_rev" )
@@ -17,7 +20,7 @@ function BEACON:ShouldTag( entity )
 end
 function BEACON:DrawUnderCircle( ent )
 	local CVD = proxi:GetCurrentViewData()
-	local refValue = math.Clamp( CVD.radius_const / math.tan( math.rad( CVD.fov_const / 2 ) ), 1, 2 )
+	local refValue = math.Clamp( CVD.radiuseval / CVD.baseratio_nomargin, 1, 2 )
 
 	local cute = ent:GetAngles():Forward():Dot( EyeAngles():Forward() )
 	local acute = math.abs( cute )
