@@ -1,3 +1,5 @@
+0.121
+Added yet another Wallfinder that can find walls on the opposite direction after piercing.
 0.12
 Added maximum distance slider for Entity Select.
 &
