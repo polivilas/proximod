@@ -25,6 +25,7 @@ table.insert( ADDON_PROP, "proxi_b_default/chat.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/wallfinderpierce.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/helpersquare.lua" )
 table.insert( ADDON_PROP, "proxi_b_default/voicechat.lua" )
+table.insert( ADDON_PROP, "proxi_b_default/wallfinderpierceback.lua" )
 
 ---- Menu
 table.insert( ADDON_PROP, "ProxiCollapsibleCheckbox.lua" )
