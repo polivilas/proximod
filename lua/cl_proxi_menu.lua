@@ -131,13 +131,45 @@ function proxi.BuildMenu( opt_tExpand )
 	proxi.Util_AppendLabel( refPanel, "Background color" )
 	proxi.Util_AppendColor( refPanel, "proxi_uidesign_backcolor")
 	
+	-- Global Beacons parameters
+	proxi.Util_MakeCategory( refPanel, "Global Finder", 1 )
+	proxi.Util_AppendLabel( refPanel, "NOTE : Beacons are able to bypass this distance using a checkbox.", 50 )
+	proxi.Util_AppendSlider( refPanel, "Beacon finder distance", "proxi_global_finderdistance", 1024, 16384, 0)
+	
 	-- Beacons
 	proxi.Util_MakeCategory( refPanel, "Beacons", 1 )
+	do
+		local cat = proxi.Util_CatchCurrentCategory( refPanel )
+		cat.List:SetSpacing( 5 )
+		
+	end
+	
 	do
 		local beacons = proxi:GetAllBeacons()
 		for _,sName in pairs( proxi:GetBeaconOrderTable() ) do
 			local objBeacon = beacons[ sName ]
-			proxi.Util_AppendCheckBox( refPanel, objBeacon:GetDisplayName() , "proxi_beacons_enable_" .. objBeacon:GetRawName() )
+			
+			local category = vgui.Create("ProxiCollapsibleCheckbox", refPanel)
+			category:SetExpanded( false )
+			category:SetText( objBeacon:GetDisplayName() )
+			category:SetConVar( "proxi_beacons_enable_" .. sName )
+			
+			category.List  = vgui.Create("DPanelList", category )
+			category.List:EnableHorizontal( false )
+			category.List:EnableVerticalScrollbar( false )
+			
+			/*local label = vgui.Create( "DLabel", category )
+			label:SetText( objBeacon:GetDescription() or "No description" )
+			category.List:AddItem( label )*/
+			
+			if objBeacon:HasBypassDistance() then
+				category.List:AddItem( proxi.Util_CreateCheckBox( "Bypass distance limit" , "proxi_beacons_settings_" .. sName .. "__bypassdistance") )
+				
+			end
+			
+			category:SetContents( category.List )
+			
+			proxi.Util_AppendPanel( refPanel, category )
 			
 		end
 		

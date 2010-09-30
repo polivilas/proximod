@@ -4,6 +4,9 @@ BEACON.Name         = "Voice Chat"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
+BEACON.CanBypassDistance     = false
+BEACON.DefaultBypassDistance = false
+
 function BEACON:Load()
 	self.myMaterial    = surface.GetTextureID( "proxi/beacon_circle_add" )	
 	self.beaconTime = 1

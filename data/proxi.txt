@@ -1,3 +1,7 @@
+0.12
+Added maximum distance slider for Entity Select.
+&
+Added maximum distance bypass checkboxes for some beacons.
 0.114
 Player beacon now only displays the first letter of the player name if the beacon is bound to the circle.
 &

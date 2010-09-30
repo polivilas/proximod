@@ -3,6 +3,9 @@ BEACON.Name         = "NPCs"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
+BEACON.CanBypassDistance     = true
+BEACON.DefaultBypassDistance = false
+
 function BEACON:Load()
 	self.myMathPool = {}
 	self.myTexture     = surface.GetTextureID( "proxi/beacon_square_8" )

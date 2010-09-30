@@ -3,6 +3,9 @@ BEACON.Name         = "Wallfinder 1st"
 BEACON.DefaultOn    = false
 BEACON.IsStandAlone = true
 
+BEACON.CanBypassDistance     = false
+BEACON.DefaultBypassDistance = false
+
 function BEACON:Load()
 	self.myMaterial = Material( "proxi/beacon_flare_add" )
 	
@@ -36,8 +39,9 @@ end
 function BEACON:PerformMath( )
 	for iTraceNum = 1, self.iTracesPerFrame do
 		local CVD = proxi:GetCurrentViewData()
-		self.radius = CVD.radius_const * 1.5
-		self.traceData.start = LocalPlayer():GetShootPos()
+		
+		self.radius = CVD.radiuseval * 1.5
+		self.traceData.start = CVD.referencepos
 		self.traceangle.y = ( self.iRevAngle / self.iRevolution ) * 360
 		self.traceData.endpos = self.traceData.start + self.traceangle:Forward() * self.radius
 		

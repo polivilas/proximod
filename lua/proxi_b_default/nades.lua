@@ -3,6 +3,9 @@ BEACON.Name         = "Nades"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
+BEACON.CanBypassDistance     = true
+BEACON.DefaultBypassDistance = false
+
 function BEACON:Load()
 	self.myMathPool = {}
 	self.myMaterial = Material( "proxi/beacon_flare_add" )

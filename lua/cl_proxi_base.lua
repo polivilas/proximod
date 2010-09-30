@@ -47,10 +47,12 @@ function proxi.Mount()
 	proxi.dat = {}
 	proxi.cvarGroups = {}
 	proxi.cvarGroups.core   = {}
+	proxi.cvarGroups.global   = {}
 	proxi.cvarGroups.regmod   = {}
 	proxi.cvarGroups.uidesign   = {}
 	
 	proxi.Util_AppendCvar( proxi.cvarGroups.core, "enable", "1")
+	proxi.Util_AppendCvar( proxi.cvarGroups.global, "finderdistance", "8192")
 	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "xrel", "0.2")
 	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "yrel", "0.2")
 	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "size", "172")

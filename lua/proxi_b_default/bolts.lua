@@ -3,6 +3,11 @@ BEACON.Name         = "Bolts"
 BEACON.DefaultOn    = true
 BEACON.IsStandAlone = false
 
+BEACON.CanBypassDistance     = false
+BEACON.DefaultBypassDistance = false
+
+BEACON.Description = "Shows Crossbow bolts, their travel direction and a rough hit prediction."
+
 function BEACON:Load()
 	self.myMathPool = {}
 	self.myMaterial = Material( "proxi/beacon_flare_add" )
