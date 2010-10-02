@@ -50,6 +50,7 @@ function proxi.Mount()
 	proxi.cvarGroups.global   = {}
 	proxi.cvarGroups.regmod   = {}
 	proxi.cvarGroups.uidesign   = {}
+	proxi.cvarGroups.eyemod   = {}
 	
 	proxi.Util_AppendCvar( proxi.cvarGroups.core, "enable", "1")
 	proxi.Util_AppendCvar( proxi.cvarGroups.global, "finderdistance", "8192")
@@ -61,6 +62,7 @@ function proxi.Mount()
 	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "radius", "2048")
 	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "angle", "50")
 	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "pitchdyn", "2")
+	proxi.Util_AppendCvar( proxi.cvarGroups.eyemod, "override", "0")
 	proxi.Util_AppendCvar( proxi.cvarGroups.uidesign, "ringcolor", {147, 201, 224, 255}, "color" )
 	proxi.Util_AppendCvar( proxi.cvarGroups.uidesign, "backcolor", {32, 37, 43, 128}, "color" )
 	

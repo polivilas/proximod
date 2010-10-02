@@ -1,3 +1,7 @@
+0.123
+Wallfinder Pierce-Traceback performs a wall-angle estimation in order to get more precision on closer walls.
+&
+Added experimental Eyemod Debug mode.
 0.122
 Added Pin Scale option (Won't work yet will all beacons).
 0.121

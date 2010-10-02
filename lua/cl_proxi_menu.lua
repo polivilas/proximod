@@ -125,6 +125,11 @@ function proxi.BuildMenu( opt_tExpand )
 	proxi.Util_AppendSlider( refPanel, "Pitch Angle", "proxi_regmod_angle", -90, 90, 0)
 	proxi.Util_AppendSlider( refPanel, "Pitch Dynamism", "proxi_regmod_pitchdyn", 0, 10, 0)
 	
+	-- EyeMod
+	proxi.Util_MakeCategory( refPanel, "Eye Mode", 1 )
+	proxi.Util_AppendCheckBox( refPanel, "Debug" , "proxi_eyemod_override" )
+	
+	
 	-- UI Design
 	proxi.Util_MakeCategory( refPanel, "UI Design", 0 )
 	proxi.Util_AppendLabel( refPanel, "Ring color" )

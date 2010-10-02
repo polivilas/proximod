@@ -26,15 +26,36 @@ function proxi.HUDPaint()
 	
 	if not proxi.dat.view_data then
 		proxi.dat.view_data = {}
-		proxi:RecomC()
 	end
-	proxi:RegularEvaluate()
+	
+	if proxi.GetVar("proxi_eyemod_override") <= 0 then
+		proxi:RecomRegular()
+		proxi:RegularEvaluate()
+		
+	else
+		proxi:RecomEyemod()
+		proxi:EyemodEvaluate()
+		
+	end
 	proxi:DoRenderVirtualScene( proxi.dat.view_data )
 
 end
 
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
+
+local PROXI_LASTMODE = nil
+
+function proxi:EyemodEvaluate()
+	local size = ScrH()
+	self.dat.view_data.draww = size
+	self.dat.view_data.drawh = size
+	self.dat.view_data.drawx = ScrW() / 2 - size / 2
+	self.dat.view_data.drawy = ScrH() / 2 - size / 2
+	self.dat.view_data.foveval    = LocalPlayer():GetFOV()
+	self.dat.view_data.bypass_distance = proxi.GetVar("proxi_global_finderdistance")
+	
+end
 
 function proxi:RegularEvaluate()
 	local size = proxi.GetVar("proxi_regmod_size")
@@ -45,6 +66,90 @@ function proxi:RegularEvaluate()
 	self.dat.view_data.foveval    = proxi.GetVar("proxi_regmod_fov")
 	self.dat.view_data.radiuseval = proxi.GetVar("proxi_regmod_radius")
 	self.dat.view_data.bypass_distance = proxi.GetVar("proxi_global_finderdistance")
+	
+end
+
+function proxi:RecomEyemod()
+	if PROXI_LASTMODE == "EYEMOD" then return end
+	PROXI_LASTMODE = "EYEMOD"
+	
+	self.dat.ang_before_pos = true
+	self.dat.view_data.referencepos_func = function( viewData )
+		return EyePos()
+		
+	end
+	self.dat.view_data.referenceang_func = function( viewData )
+		return (sharpeye_focus and sharpeye_focus.GetSmoothedViewAngles and sharpeye_focus:GetSmoothedViewAngles()) or EyeAngles()
+		
+	end
+	self.dat.view_data.pos_func = function( viewData )
+		return EyePos()
+		
+	end
+	self.dat.view_data.ang_func = function( viewData )
+		return (sharpeye_focus and sharpeye_focus.GetSmoothedViewAngles and sharpeye_focus:GetSmoothedViewAngles()) or EyeAngles()
+		
+	end
+	
+	self.dat.view_data.referencepos = nil
+	self.dat.view_data.referenceang = nil
+	self.dat.view_data.pos = nil
+	self.dat.view_data.ang = nil
+
+	
+	self.dat.view_data.radiuseval_func = function( viewData ) return nil end
+	self.dat.view_data.foveval_func    = function( viewData ) return nil end
+	self.dat.view_data.radiuseval = 2048
+	self.dat.view_data.foveval = 10
+	
+	self.dat.view_data.drawx  = 0
+	self.dat.view_data.drawy  = 0
+	self.dat.view_data.draww  = 0
+	self.dat.view_data.drawh  = 0
+	
+	self.dat.view_data.margin = 2^0.5
+	
+end
+
+function proxi:RecomRegular()
+	if PROXI_LASTMODE == "REGULAR" then return end
+	PROXI_LASTMODE = "REGULAR"
+	
+	self.dat.ang_before_pos = true
+	self.dat.view_data.referencepos_func = function( viewData )
+		return EyePos()
+		
+	end
+	self.dat.view_data.referenceang_func = function( viewData )
+		return EyeAngles()
+		
+	end
+	self.dat.view_data.pos_func = function( viewData )
+		local dist = viewData.radiuseval / math.tan( math.rad( viewData.foveval / 2 ) )
+		return viewData.referencepos - viewData.ang:Forward() * dist
+		
+	end
+	self.dat.view_data.ang_func = function( viewData )
+		return Angle( proxi.GetVar("proxi_regmod_angle") + (proxi.GetVar("proxi_regmod_pitchdyn") / 10) * viewData.referenceang.p, viewData.referenceang.y, 0 )
+	end
+	
+	self.dat.view_data.referencepos = nil
+	self.dat.view_data.referenceang = nil
+	self.dat.view_data.pos = nil
+	self.dat.view_data.ang = nil
+
+	
+	self.dat.view_data.radiuseval_func = function( viewData ) return nil end
+	self.dat.view_data.foveval_func    = function( viewData ) return nil end
+	self.dat.view_data.radiuseval = 512
+	self.dat.view_data.foveval = 10
+	
+	self.dat.view_data.drawx  = 0
+	self.dat.view_data.drawy  = 0
+	self.dat.view_data.draww  = 0
+	self.dat.view_data.drawh  = 0
+	
+	self.dat.view_data.margin = 2^0.5
 	
 end
 
