@@ -13,7 +13,11 @@ local PROXI_CURRENT_VIEWDATA = nil
 local PROXI_CALC_SCREENPOS = nil
 
 function proxi:GetPinScale()
-	return self.GetVar( "proxi_regmod_size" ) / 256
+	return self.GetVar( "proxi_regmod_size" ) / 256 * self.GetVar( "proxi_regmod_pinscale" ) / 5
+end
+
+function proxi:GetPin3DScale( )
+	return self.GetVar( "proxi_regmod_pinscale" ) / 5
 end
 
 function proxi.HUDPaint()
