@@ -1,3 +1,5 @@
+0.122
+Added Pin Scale option (Won't work yet will all beasons).
 0.121
 Added yet another Wallfinder that can find walls on the opposite direction after piercing.
 0.12
