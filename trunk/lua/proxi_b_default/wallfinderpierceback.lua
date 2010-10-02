@@ -12,6 +12,9 @@ function BEACON:Load()
 	self.iPierceTimes  = 2
 	self.iTracesPerFrame  = 5
 	self.iGap  = 1 / self.iTracesPerFrame
+	self.fRadMul = 0.2
+	self.fRadDes = 0.2
+	self.fFracMul = 3
 	
 	self.iRevAngle  = 0
 	self.iRevolution = 120
@@ -19,6 +22,8 @@ function BEACON:Load()
 	self.tWalls = {}
 	self.iWall  = 1
 	self.iMaxWalls = self.iRevolution * 6 // MAX WALLS IS DOUBLED AS OPPOSED TO PIERCER
+	
+	self.vAdd = Vector( 0, 0, 0 )
 	
 	for i = 1, self.iMaxWalls do
 		self.tWalls[ i ] = {}
@@ -29,6 +34,7 @@ function BEACON:Load()
 	self.traceData.mask = CONTENTS_SOLID
 	self.traceData.filter = nil
 	self.traceangle = Angle( 0, 0, 0 )
+	self.traceforward = Vector( 0, 0, 0 )
 	self.radius = 0
 	
 	self.traceRes = {}
@@ -41,7 +47,7 @@ function BEACON:Load()
 	
 	self.upNorm = Vector( 0, 0, 1 )
 	
-	self.wallColors = { Color( 192, 128, 255, 128 ), Color( 255, 128, 192, 128 ), Color( 255, 255, 128, 128 ) }
+	self.wallColors = { Color( 192, 128, 255, 128 ), Color( 255, 128, 192, 64 ), Color( 255, 255, 128, 16 ) }
 	
 end
 
@@ -49,20 +55,24 @@ function BEACON:PerformMath( )
 	local numTracesPerformed = 0
 	local CVD = proxi:GetCurrentViewData()
 	local zPos = CVD.referencepos.z
+	
+	self.vAdd.z = (proxi.GetVar("proxi_eyemod_override") > 0) and -48 or 0
+	
 	for iTraceNum = 1, self.iTracesPerFrame do
 		
 		self.radius = CVD.radiuseval * 1.5
 		self.traceData.start = CVD.referencepos
 		self.tracebackData.endpos = CVD.referencepos
 		self.traceangle.y = ( self.iRevAngle / self.iRevolution ) * 360
-		self.traceData.endpos = self.traceData.start + self.traceangle:Forward() * self.radius
+		self.traceforward = self.traceangle:Forward()
+		self.traceData.endpos = self.traceData.start + self.traceforward * self.radius
 		
 		self.traceRes = util.TraceLine( self.traceData )
 		numTracesPerformed = numTracesPerformed + 1
 		if self.traceRes.Hit then
-			local crossMul = self.traceRes.HitNormal:Cross( self.upNorm ) * self.radius * 0.1
-			self.tWalls[ self.iWall ][1] = self.traceRes.HitPos + crossMul
-			self.tWalls[ self.iWall ][2] = self.traceRes.HitPos - crossMul
+			local crossMul = self.traceRes.HitNormal:Cross( self.upNorm ) * self.radius * 0.1 * self.fRadMul * (1 + self.fRadDes * ( math.abs(self.traceforward:Dot( self.traceRes.HitNormal )) - 1 ) ) * (1 + self.traceRes.Fraction * self.fFracMul)
+			self.tWalls[ self.iWall ][1] = self.traceRes.HitPos + crossMul + self.vAdd
+			self.tWalls[ self.iWall ][2] = self.traceRes.HitPos - crossMul + self.vAdd
 			self.tWalls[ self.iWall ][3] = 1
 			self.tWalls[ self.iWall ][4] = zPos
 			
@@ -74,25 +84,25 @@ function BEACON:PerformMath( )
 			
 			local pierceTime = 1
 			while (pierceTime <= self.iPierceTimes) and self.traceRes.Hit do
-				self.traceData.start = self.traceRes.HitPos + self.traceangle:Forward()
+				self.traceData.start = self.traceRes.HitPos + self.traceforward
 				self.traceRes = util.TraceLine( self.traceData )
 				numTracesPerformed = numTracesPerformed + 1
 				if self.traceRes.Hit then
-					local crossMul = self.traceRes.HitNormal:Cross( self.upNorm ) * self.radius * 0.1
-					self.tWalls[ self.iWall ][1] = self.traceRes.HitPos + crossMul
-					self.tWalls[ self.iWall ][2] = self.traceRes.HitPos - crossMul
+					local crossMul = self.traceRes.HitNormal:Cross( self.upNorm ) * self.radius * 0.1 * self.fRadMul * (1 + self.fRadDes * ( math.abs(self.traceforward:Dot( self.traceRes.HitNormal )) - 1 ) ) * (1 + self.traceRes.Fraction * self.fFracMul)
+					self.tWalls[ self.iWall ][1] = self.traceRes.HitPos + crossMul + self.vAdd
+					self.tWalls[ self.iWall ][2] = self.traceRes.HitPos - crossMul + self.vAdd
 					self.tWalls[ self.iWall ][3] = 2
 					self.tWalls[ self.iWall ][4] = zPos
 				
 					self.iWall = (self.iWall % self.iMaxWalls) + 1
 					
-					self.tracebackData.start = self.traceRes.HitPos - self.traceangle:Forward()
+					self.tracebackData.start = self.traceRes.HitPos - self.traceforward
 					self.tracebackRes = util.TraceLine( self.tracebackData )
 					numTracesPerformed = numTracesPerformed + 1
 					if self.tracebackRes.Hit then // It should always hit something, otherwise it's weird...
-						local crossMul = self.tracebackRes.HitNormal:Cross( self.upNorm ) * self.radius * 0.1
-						self.tWalls[ self.iWall ][1] = self.tracebackRes.HitPos + crossMul
-						self.tWalls[ self.iWall ][2] = self.tracebackRes.HitPos - crossMul
+						local crossMul = self.tracebackRes.HitNormal:Cross( self.upNorm ) * self.radius * 0.1 * self.fRadMul * (1 + self.fRadDes * ( math.abs(self.traceforward:Dot( self.traceRes.HitNormal )) - 1 ) ) * (1 + self.traceRes.Fraction * self.fFracMul)
+						self.tWalls[ self.iWall ][1] = self.tracebackRes.HitPos + crossMul + self.vAdd
+						self.tWalls[ self.iWall ][2] = self.tracebackRes.HitPos - crossMul + self.vAdd
 						self.tWalls[ self.iWall ][3] = 3
 						self.tWalls[ self.iWall ][4] = zPos
 					
@@ -115,7 +125,9 @@ function BEACON:PerformMath( )
 		
 	end
 	
-	self.iRevAngle = (self.iRevAngle + 1) % self.iRevolution
+	if math.abs(LocalPlayer():GetVelocity().z) < 32 then
+		self.iRevAngle = (self.iRevAngle + 1) % self.iRevolution
+	end
 	
 end
 
@@ -130,7 +142,8 @@ function BEACON:DrawUnderCircle( )
 	render.SetMaterial( self.myMaterial )
 	for i = 1, self.iMaxWalls do
 		if self.tWalls[ i ][1] ~= nil then
-			render.DrawBeam( self.tWalls[ i ][1], self.tWalls[ i ][2], 32 * CVD.radiuseval / CVD.baseratio_nomargin / 8192, 0, 1, self.wallColors[ self.tWalls[ i ][3] ] )
+			--render.DrawBeam( self.tWalls[ i ][1], self.tWalls[ i ][2], 32 * CVD.radiuseval / CVD.baseratio_nomargin / 8192, 0, 1, self.wallColors[ self.tWalls[ i ][3] ] )
+			render.DrawBeam( self.tWalls[ i ][1], self.tWalls[ i ][2], 48, 0.3, 0.7, self.wallColors[ self.tWalls[ i ][3] ] )
 			
 		end
 		
