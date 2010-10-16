@@ -72,7 +72,7 @@ function BEACON:DrawUnderCircle2D( ent )
 	end
 	
 	if thisMathPool.ratio < 1.5 then
-		local text = proxi:FamiliarizeString( string.gsub( ent:GetClass(), "npc_", "" ) )
+		local text = proxi_util.FamiliarizeString( string.gsub( ent:GetClass(), "npc_", "" ) )
 		
 		surface.SetFont( "DefaultSmall" )
 		local wB, hB = surface.GetTextSize( text )
