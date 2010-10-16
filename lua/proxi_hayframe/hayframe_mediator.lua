@@ -141,10 +141,15 @@ function HAY_MAIN:InitializeGenericConstructors()
 		myPanel:SetText( stData.Text or "<Error : no text !>" )
 		myPanel:SetContentAlignment( stData.ContentAlignment or 4 )
 		if stData.Font then myPanel:SetFont( stData.Font ) end
+		if stData.Wrap then
+			myPanel:SetWrap( true )
+			myPanel:SetAutoStretchVertical( true )
+			
+		end
 		
 		return myPanel
 		
-	end , "noconvars" )
+	end, "noconvars" )
 	
 	self:RegisterParamType( "bool" , function( sConvarName, stData )
 		local myPanel = vgui.Create( "DCheckBoxLabel" )
@@ -192,6 +197,14 @@ function HAY_MAIN:InitializeGenericConstructors()
 		
 		return myPanel
 	end )
+	
+	self:RegisterParamType( "panel_readonly" , function( sConvarName, stData )	
+		local myPanel = vgui.Create("DTextEntry")
+		myPanel:SetText( stData.Text or "<Error : no text !>" )
+		myPanel:SetEditable( false )
+		
+		return myPanel
+	end, "noconvars" )
 	
 	self:RegisterParamType( "panel_button" , function( sFullConvarName, stData )	
 		local myPanel = vgui.Create("DButton")
