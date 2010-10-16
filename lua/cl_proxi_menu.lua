@@ -71,160 +71,7 @@ function proxi:BuildMenu()
 	local mainPanel = PROXI_MENU:GetContents()
 	
 	////
-	local topPanel = vgui.Create( "DPanel", mainPanel )
-	do
-		local title = self:BuildParamPanel( "noconvar", { Type = "panel_label", Text = PROXI_NAME, ContentAlignment = 5, Font = "DefaultBold" } )
-		title.Paint = function (self)
-			surface.SetDrawColor( 0, 0, 0, 96 )
-			surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
-		end
-		title:SetParent( topPanel )
-		
-		local subTitle = nil
-		do
-			local MY_VERSION, ONLINE_VERSION = proxi_internal.GetVersionData()
-			MY_VERSION = "v" .. tostring(MY_VERSION)
-			ONLINE_VERSION = (ONLINE_VERSION == -1) and "(?)" or ("v" .. tostring( ONLINE_VERSION ))
-			subTitle = self:BuildParamPanel( "noconvar", { Type = "panel_label", Text = "Using " .. (proxi_cloud:IsUsingCloud() and "Cloud " .. ONLINE_VERSION or "Locale " .. MY_VERSION), ContentAlignment = 4 } )
-		end
-		subTitle:SetParent( topPanel )
-		
-		local MY_VERSION, ONLINE_VERSION = proxi_internal.GetVersionData()
-		if ((MY_VERSION < ONLINE_VERSION) and proxi_cloud:IsUsingCloud()) then
-			subTitle:SetToolTip( "There is an update ! You're currently using a temporary copy of the new version (You have v" .. tostring( MY_VERSION ) .. " installed)." )
-			subTitle.Think = function (self)
-				local blink = 127 + (math.sin( math.pi * CurTime() * 0.5 ) + 1 ) * 64
-				self:SetColor( Color( 255, 255, 255, blink ) ) // TODO : ?
-				
-			end
-			
-		end
-		
-		local enableBox = self:BuildParamPanel( "core_enable", { Type = "bool_nolabel", Style = "grip" } )
-		enableBox:SetParent( title )
-		enableBox:SetToolTip( "Toggle " .. tostring( PROXI_NAME ) .. "." )
-		enableBox.Paint = function (self)
-			local isEnabled = self:GetChecked()
-			if isEnabled then
-				--local blink = (math.sin( math.pi * CurTime() ) + 1 ) / 2 * 64
-				local blink = 222 + (math.sin( math.pi * CurTime() ) + 1 ) * 16
-				surface.SetDrawColor( blink, blink, blink, 255 )
-				
-			else
-				surface.SetDrawColor( 192, 192, 192, 255 )
-				
-			end
-			
-			surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
-			
-			surface.SetDrawColor( 0, 0, 0, 255 )
-			surface.DrawOutlinedRect( 0, 0, self:GetWide(), self:GetTall() )
-			
-			if not isEnabled and ( CurTime() % 1 > 0.5 ) then
-				surface.DrawOutlinedRect( 2, 2, self:GetWide() - 4, self:GetTall() - 4 )
-				
-			end
-			
-		end
-		
-		local closeBox = self:BuildParamPanel( "noconvar", { Type = "panel_sysbutton", Style = "close", DoClick = function ( self ) proxi:CallCmd("-menu") end } )
-		closeBox:SetParent( title )
-		closeBox:SetToolTip( "Close menu." )
-		
-		local positionBox = self:BuildParamPanel( "noconvar", { Type = "panel_sysbutton", Style = "left", DoClick = function ( self ) proxi:SetVar( "menu_position", (proxi:GetVar( "menu_position" ) > 0) and 0 or 1 ) end } )
-		positionBox:SetParent( title )
-		positionBox:SetToolTip( "Change addon dock position." )
-		
-		local reloadCloud = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/toybox", DoClick = function() proxi:CallCmd("-menu") proxi:CallCmd("cloud_ask") end } )
-		reloadCloud:SetParent( subTitle )
-		reloadCloud:SetToolTip( "Press to use the latest version from the Cloud." )
-		
-		local reloadLocale = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/application_put", DoClick = function() proxi:CallCmd("-menu") proxi:CallCmd("cloud_locale") end } )
-		reloadLocale:SetParent( subTitle )
-		reloadLocale:SetToolTip( "Press to use your Locale installed version." )
-		
-		local loadChangelog = self:BuildParamPanel( "noconvar", { Type = "panel_button", Text = "Changelog", DoClick = function() proxi:CallCmd("call_changelog") end } )
-		loadChangelog:SetParent( subTitle )
-		loadChangelog:SetToolTip( "Press to view the changelog." )
-		
-		if MY_VERSION < ONLINE_VERSION then
-			loadChangelog.PaintOver = function ( self )
-				local blink = (math.sin( math.pi * CurTime() * 0.5 ) + 1 ) * 64
-				surface.SetDrawColor( 255, 255, 255, blink )
-				draw.RoundedBoxEx( 2, 0, 0, self:GetWide(), self:GetTall(), Color( 255, 255, 255, blink ), true, true, true, true  )
-				
-			end
-			loadChangelog:SetToolTip( "There are updates ! You should update your Locale." )
-			
-		else
-			loadChangelog:SetToolTip( "Press to view the changelog." )
-			
-		end
-		
-		
-		topPanel._p_title = title
-		topPanel._p_subTitle = subTitle
-		topPanel._p_enableBox = enableBox
-		topPanel._p_closeBox = closeBox
-		topPanel._p_positionBox = positionBox
-		
-		topPanel._p_reloadCloud = reloadCloud
-		topPanel._p_reloadLocale = reloadLocale
-		topPanel._p_loadChangelog = loadChangelog
-	
-	end
-	topPanel.Paint = function (self)
-		surface.SetDrawColor( 0, 0, 0, 96 )
-		surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
-	end
-	topPanel.PerformLayout = function (self)
-		self:SetWide( self:GetParent():GetWide() )
-		self._p_title:SetWide( self:GetWide() )
-		self._p_subTitle:SetWide( self:GetWide() )
-		
-		self._p_title:PerformLayout( )
-		self._p_subTitle:PerformLayout( )
-		self._p_enableBox:PerformLayout( )
-		self._p_positionBox:PerformLayout( )
-		self._p_closeBox:PerformLayout( )
-		
-		self._p_reloadCloud:PerformLayout( )
-		self._p_reloadLocale:PerformLayout( )
-		self._p_loadChangelog:PerformLayout( )
-		
-		self._p_title:CenterHorizontal( )
-		self._p_subTitle:CenterHorizontal( )
-		
-		self:SetTall( self._p_title:GetTall() + self._p_subTitle:GetTall() )
-		
-		self._p_title:AlignTop( 0 )
-		self._p_subTitle:SetWide( self._p_subTitle:GetWide() - 4 )
-		self._p_subTitle:AlignLeft( 4 )
-		self._p_subTitle:MoveBelow( self._p_title, 0 )
-		
-		local boxSize = self._p_title:GetTall()
-		self._p_enableBox:SetSize( boxSize * 0.8, boxSize * 0.8 )
-		self._p_positionBox:SetSize( boxSize * 0.8, boxSize * 0.8 )
-		self._p_closeBox:SetSize( boxSize * 0.8, boxSize * 0.8 )
-		self._p_enableBox:CenterVertical( )
-		self._p_positionBox:CenterVertical( )
-		self._p_closeBox:CenterVertical( )
-		self._p_enableBox:AlignLeft( boxSize * 0.1 )
-		self._p_closeBox:AlignRight( boxSize * 0.1 )
-		self._p_positionBox:MoveLeftOf( self._p_closeBox, boxSize * 0.1 )
-		
-		local buttonSize = self._p_subTitle:GetTall()
-		self._p_reloadCloud:SetSize( buttonSize * 0.8, buttonSize * 0.8 )
-		self._p_reloadLocale:SetSize( buttonSize * 0.8, buttonSize * 0.8 )
-		self._p_loadChangelog:SizeToContents( )
-		self._p_loadChangelog:SetSize( self._p_loadChangelog:GetWide() + 6, buttonSize * 0.8 )
-		self._p_reloadCloud:CenterVertical( )
-		self._p_reloadLocale:CenterVertical( )
-		self._p_loadChangelog:CenterVertical( )
-		self._p_reloadCloud:AlignRight( boxSize * 0.1 )
-		self._p_reloadLocale:MoveLeftOf( self._p_reloadCloud, boxSize * 0.1 )
-		self._p_loadChangelog:MoveLeftOf( self._p_reloadLocale, boxSize * 0.3 )
-	end
+	local topPanel = proxi:BuildHeader( mainPanel, PROXI_NAME )
 	
 	////
 	local tabMaster = vgui.Create( "DPropertySheet", mainPanel )
@@ -361,5 +208,168 @@ end
 
 function proxi:CloseMenu()
 	self:GetMenu():Close()
+	
+end
+
+
+
+function proxi:BuildHeader( mainPanel, sHeaderName )
+	////
+	local topPanel = vgui.Create( "DPanel", mainPanel )
+	do
+		local title = self:BuildParamPanel( "noconvar", { Type = "panel_label", Text = sHeaderName, ContentAlignment = 5, Font = "DefaultBold" } )
+		title.Paint = function (self)
+			surface.SetDrawColor( 0, 0, 0, 96 )
+			surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
+		end
+		title:SetParent( topPanel )
+		
+		local subTitle = nil
+		do
+			local MY_VERSION, ONLINE_VERSION = proxi_internal.GetVersionData()
+			MY_VERSION = "v" .. tostring(MY_VERSION)
+			ONLINE_VERSION = (ONLINE_VERSION == -1) and "(?)" or ("v" .. tostring( ONLINE_VERSION ))
+			subTitle = self:BuildParamPanel( "noconvar", { Type = "panel_label", Text = "Using " .. (proxi_cloud:IsUsingCloud() and "Cloud " .. ONLINE_VERSION or "Locale " .. MY_VERSION), ContentAlignment = 4 } )
+		end
+		subTitle:SetParent( topPanel )
+		
+		local MY_VERSION, ONLINE_VERSION = proxi_internal.GetVersionData()
+		if ((MY_VERSION < ONLINE_VERSION) and proxi_cloud:IsUsingCloud()) then
+			subTitle:SetToolTip( "There is an update ! You're currently using a temporary copy of the new version (You have v" .. tostring( MY_VERSION ) .. " installed)." )
+			subTitle.Think = function (self)
+				local blink = 127 + (math.sin( math.pi * CurTime() * 0.5 ) + 1 ) * 64
+				self:SetColor( Color( 255, 255, 255, blink ) ) // TODO : ?
+				
+			end
+			
+		end
+		
+		local enableBox = self:BuildParamPanel( "core_enable", { Type = "bool_nolabel", Style = "grip" } )
+		enableBox:SetParent( title )
+		enableBox:SetToolTip( "Toggle " .. tostring( sHeaderName ) .. "." )
+		enableBox.Paint = function (self)
+			local isEnabled = self:GetChecked()
+			if isEnabled then
+				--local blink = (math.sin( math.pi * CurTime() ) + 1 ) / 2 * 64
+				local blink = 222 + (math.sin( math.pi * CurTime() ) + 1 ) * 16
+				surface.SetDrawColor( blink, blink, blink, 255 )
+				
+			else
+				surface.SetDrawColor( 192, 192, 192, 255 )
+				
+			end
+			
+			surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
+			
+			surface.SetDrawColor( 0, 0, 0, 255 )
+			surface.DrawOutlinedRect( 0, 0, self:GetWide(), self:GetTall() )
+			
+			if not isEnabled and ( CurTime() % 1 > 0.5 ) then
+				surface.DrawOutlinedRect( 2, 2, self:GetWide() - 4, self:GetTall() - 4 )
+				
+			end
+			
+		end
+		
+		local closeBox = self:BuildParamPanel( "noconvar", { Type = "panel_sysbutton", Style = "close", DoClick = function ( self ) proxi:CallCmd("-menu") end } )
+		closeBox:SetParent( title )
+		closeBox:SetToolTip( "Close menu." )
+		
+		local positionBox = self:BuildParamPanel( "noconvar", { Type = "panel_sysbutton", Style = "left", DoClick = function ( self ) proxi:SetVar( "menu_position", (proxi:GetVar( "menu_position" ) > 0) and 0 or 1 ) end } )
+		positionBox:SetParent( title )
+		positionBox:SetToolTip( "Change addon dock position." )
+		
+		local reloadCloud = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/toybox", DoClick = function() proxi:CallCmd("-menu") proxi:CallCmd("cloud_ask") end } )
+		reloadCloud:SetParent( subTitle )
+		reloadCloud:SetToolTip( "Press to use the latest version from the Cloud." )
+		
+		local reloadLocale = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/application_put", DoClick = function() proxi:CallCmd("-menu") proxi:CallCmd("cloud_locale") end } )
+		reloadLocale:SetParent( subTitle )
+		reloadLocale:SetToolTip( "Press to use your Locale installed version." )
+		
+		local loadChangelog = self:BuildParamPanel( "noconvar", { Type = "panel_button", Text = "Changelog", DoClick = function() proxi:CallCmd("call_changelog") end } )
+		loadChangelog:SetParent( subTitle )
+		loadChangelog:SetToolTip( "Press to view the changelog." )
+		
+		if MY_VERSION < ONLINE_VERSION then
+			loadChangelog.PaintOver = function ( self )
+				local blink = (math.sin( math.pi * CurTime() * 0.5 ) + 1 ) * 64
+				surface.SetDrawColor( 255, 255, 255, blink )
+				draw.RoundedBoxEx( 2, 0, 0, self:GetWide(), self:GetTall(), Color( 255, 255, 255, blink ), true, true, true, true  )
+				
+			end
+			loadChangelog:SetToolTip( "There are updates ! You should update your Locale." )
+			
+		else
+			loadChangelog:SetToolTip( "Press to view the changelog." )
+			
+		end
+		
+		
+		topPanel._p_title = title
+		topPanel._p_subTitle = subTitle
+		topPanel._p_enableBox = enableBox
+		topPanel._p_closeBox = closeBox
+		topPanel._p_positionBox = positionBox
+		
+		topPanel._p_reloadCloud = reloadCloud
+		topPanel._p_reloadLocale = reloadLocale
+		topPanel._p_loadChangelog = loadChangelog
+	
+	end
+	topPanel.Paint = function (self)
+		surface.SetDrawColor( 0, 0, 0, 96 )
+		surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
+	end
+	topPanel.PerformLayout = function (self)
+		self:SetWide( self:GetParent():GetWide() )
+		self._p_title:SetWide( self:GetWide() )
+		self._p_subTitle:SetWide( self:GetWide() )
+		
+		self._p_title:PerformLayout( )
+		self._p_subTitle:PerformLayout( )
+		self._p_enableBox:PerformLayout( )
+		self._p_positionBox:PerformLayout( )
+		self._p_closeBox:PerformLayout( )
+		
+		self._p_reloadCloud:PerformLayout( )
+		self._p_reloadLocale:PerformLayout( )
+		self._p_loadChangelog:PerformLayout( )
+		
+		self._p_title:CenterHorizontal( )
+		self._p_subTitle:CenterHorizontal( )
+		
+		self:SetTall( self._p_title:GetTall() + self._p_subTitle:GetTall() )
+		
+		self._p_title:AlignTop( 0 )
+		self._p_subTitle:SetWide( self._p_subTitle:GetWide() - 4 )
+		self._p_subTitle:AlignLeft( 4 )
+		self._p_subTitle:MoveBelow( self._p_title, 0 )
+		
+		local boxSize = self._p_title:GetTall()
+		self._p_enableBox:SetSize( boxSize * 0.8, boxSize * 0.8 )
+		self._p_positionBox:SetSize( boxSize * 0.8, boxSize * 0.8 )
+		self._p_closeBox:SetSize( boxSize * 0.8, boxSize * 0.8 )
+		self._p_enableBox:CenterVertical( )
+		self._p_positionBox:CenterVertical( )
+		self._p_closeBox:CenterVertical( )
+		self._p_enableBox:AlignLeft( boxSize * 0.1 )
+		self._p_closeBox:AlignRight( boxSize * 0.1 )
+		self._p_positionBox:MoveLeftOf( self._p_closeBox, boxSize * 0.1 )
+		
+		local buttonSize = self._p_subTitle:GetTall()
+		self._p_reloadCloud:SetSize( buttonSize * 0.8, buttonSize * 0.8 )
+		self._p_reloadLocale:SetSize( buttonSize * 0.8, buttonSize * 0.8 )
+		self._p_loadChangelog:SizeToContents( )
+		self._p_loadChangelog:SetSize( self._p_loadChangelog:GetWide() + 6, buttonSize * 0.8 )
+		self._p_reloadCloud:CenterVertical( )
+		self._p_reloadLocale:CenterVertical( )
+		self._p_loadChangelog:CenterVertical( )
+		self._p_reloadCloud:AlignRight( boxSize * 0.1 )
+		self._p_reloadLocale:MoveLeftOf( self._p_reloadCloud, boxSize * 0.1 )
+		self._p_loadChangelog:MoveLeftOf( self._p_reloadLocale, boxSize * 0.3 )
+	end
+	
+	return topPanel
 	
 end
