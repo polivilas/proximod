@@ -142,7 +142,7 @@ function proxi:BuildMenu()
 		
 		tabMaster:AddSheet( "Beacons", formBeacons, "gui/silkicons/application_view_detail", false, false, "All your scripts." )
 		tabMaster:AddSheet( "Options", formOptions, "gui/silkicons/wrench", false, false, "Settings." )
-		tabMaster:AddSheet( "UI", formDesign, "gui/silkicons/wrench", false, false, "Appearance." )
+		tabMaster:AddSheet( "UI", formDesign, "gui/silkicons/palette", false, false, "Appearance." )
 		
 	end
 	
