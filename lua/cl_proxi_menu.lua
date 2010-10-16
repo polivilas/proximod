@@ -279,11 +279,11 @@ function proxi:BuildHeader( mainPanel, sHeaderName )
 		positionBox:SetParent( title )
 		positionBox:SetToolTip( "Change addon dock position." )
 		
-		local reloadCloud = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/toybox", DoClick = function() proxi:CallCmd("-menu") proxi:CallCmd("cloud_ask") end } )
+		local reloadCloud = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/toybox", DoClick = function() proxi:CallCmd("-menu") proxi:ReloadFromCloud() end } )
 		reloadCloud:SetParent( subTitle )
 		reloadCloud:SetToolTip( "Press to use the latest version from the Cloud." )
 		
-		local reloadLocale = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/application_put", DoClick = function() proxi:CallCmd("-menu") proxi:CallCmd("cloud_locale") end } )
+		local reloadLocale = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/application_put", DoClick = function() proxi:CallCmd("-menu") proxi:ReloadFromLocale() end } )
 		reloadLocale:SetParent( subTitle )
 		reloadLocale:SetToolTip( "Press to use your Locale installed version." )
 		
