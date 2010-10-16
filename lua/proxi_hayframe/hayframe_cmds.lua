@@ -32,12 +32,12 @@ function HAY_MAIN:RemoveCmd( sCmdName )
 end
 
 // Should not ...
-function HAY_MAIN:CallCmd( sCmdName )
+function HAY_MAIN:CallCmd( sCmdName, ... )
 	local prefix = string.find( sCmdName, "+" ) and "+" or string.find( sCmdName, "-" ) and "-" or ""
 	sCmdName = string.gsub( sCmdName, "+", "" )
 	sCmdName = string.gsub( sCmdName, "-", "" )
 	
-	RunConsoleCommand( prefix .. HAY_LOCAL_CONCMDPREFIX .. sCmdName )
+	RunConsoleCommand( prefix .. HAY_LOCAL_CONCMDPREFIX .. sCmdName, ... )
 	
 end
 
