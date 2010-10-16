@@ -341,8 +341,8 @@ function proxi.RegisterBeacon( objBeacon, sName )
 		proxi:CreateVarParam("bool", "beacons_settings_" .. sName .. "__bypassdistance", (objBeacon.DefaultBypassDistance or false) and "1" or "0")
 	
 	end
-	proxi:CreateVarParam("bool", "beacons_enable_" .. sName, (objBeacon.DefaultOn or false) and "1" or "0", function( sCvar, prev, new )
-		local name = string.gsub( sCvar, "beacons_enable_", "" )
+	proxi:CreateVarParam("bool", "beacons_enable_" .. sName, (objBeacon.DefaultOn or false) and "1" or "0", { callback = function( sCvar, prev, new )
+		--local name = string.gsub( sCvar, proxi:GetVarName( "beacons_enable_" ), "" )
 		
 		if not proxi then return end
 		if not proxi.GetAllBeacons or not proxi:GetAllBeacons() or not proxi:GetAllBeacons()[ sName ]  then return end
@@ -355,7 +355,7 @@ function proxi.RegisterBeacon( objBeacon, sName )
 			
 		end
 		
-	end)
+	end } )
 	
 	setmetatable(objBeacon, proxi_beacon_meta)
 	
