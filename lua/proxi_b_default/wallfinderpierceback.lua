@@ -56,7 +56,7 @@ function BEACON:PerformMath( )
 	local CVD = proxi:GetCurrentViewData()
 	local zPos = CVD.referencepos.z
 	
-	self.vAdd.z = (proxi.GetVar("proxi_eyemod_override") > 0) and -48 or 0
+	self.vAdd.z = (proxi:GetVar("eyemod_override") > 0) and -48 or 0
 	
 	for iTraceNum = 1, self.iTracesPerFrame do
 		

@@ -6,19 +6,19 @@
 //--------------------------------------------//
 // Base                                       //
 ////////////////////////////////////////////////
+-- proxi table is declared by the Cloud. Don't empty it on this file.
 
--- Added due to callback problems with the cvars lib.
-if not PROXI__CALLBACK_FUNC then
-	PROXI__CALLBACK_FUNC = {}
-	
-end
+-- Don't use local shortcut here, it fails (index upvalue)
+----local proxi = proxi
 
+PROXI_SHORT = "PROXI"
 
+proxi_util = {}
 
-
-function proxi:IsEnabled()
-	-- Security for external apps.
-	return (self or proxi).GetVar("proxi_core_enable") > 0
+function proxi.IsEnabled()
+	-- Here we use proxi and no method form, as an extra security for external scripts
+	-- that would try to call proxi.IsEnabled()
+	return proxi:GetVar("core_enable") > 0
 
 end
 
@@ -27,54 +27,20 @@ function proxi.QuickThink()
 
 end
 
-function proxi.RevertAddon()
-	for sSubFix,tCvarGroup in pairs( proxi.cvarGroups ) do
-		proxi.Util_RestoreCvars( tCvarGroup, "proxi_" .. sSubFix .. "_" )
-		
-	end
-	
-end
-
-function proxi.RevertDesign()
-	proxi.Util_RestoreCvars( proxi.cvarGroups.uidesign, "proxi_uidesign_" )
-	
-end
 
 function proxi.Mount()
-	print("")
-	print("[ Mounting " .. PROXI_NAME .. " ... ]")
+	local self = proxi
+	
+	proxi_util.OutputLineBreak( )
+	proxi_util.OutputIn( "Mounting ..." )
 	
 	proxi.dat = {}
-	proxi.cvarGroups = {}
-	proxi.cvarGroups.core   = {}
-	proxi.cvarGroups.global   = {}
-	proxi.cvarGroups.regmod   = {}
-	proxi.cvarGroups.uidesign   = {}
-	proxi.cvarGroups.eyemod   = {}
 	
-	proxi.Util_AppendCvar( proxi.cvarGroups.core, "enable", "1")
-	proxi.Util_AppendCvar( proxi.cvarGroups.global, "finderdistance", "8192")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "xrel", "0.2")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "yrel", "0.2")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "size", "172")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "pinscale", "5")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "fov", "45")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "radius", "2048")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "angle", "50")
-	proxi.Util_AppendCvar( proxi.cvarGroups.regmod, "pitchdyn", "2")
-	proxi.Util_AppendCvar( proxi.cvarGroups.eyemod, "override", "0")
-	proxi.Util_AppendCvar( proxi.cvarGroups.uidesign, "ringcolor", {147, 201, 224, 255}, "color" )
-	proxi.Util_AppendCvar( proxi.cvarGroups.uidesign, "backcolor", {32, 37, 43, 128}, "color" )
-	
-	for sSubFix,tCvarGroup in pairs( proxi.cvarGroups ) do
-		proxi.Util_BuildCvars( tCvarGroup, "proxi_" .. sSubFix .. "_" )
-		
-	end
-	
-	if not PROXI__CALLBACK_FUNC["proxi_core_enable"] then
-		cvars.AddChangeCallback( "proxi_core_enable" , function( sCvar, prev, new )
+	self:RequireParameterMediator( )
+	self:CreateVarParam( "bool", "core_enable", "1", { callback = function( sCvar, prev, new )
 			if not proxi then return end
-			if (tonumber( new ) <= 0 and tonumber( prev ) <= 0) or (tonumber( new ) > 0 and tonumber( prev ) > 0) then return end
+			-- The following line is performed by the param already, as it is a bool.
+			--if (tonumber( new ) <= 0 and tonumber( prev ) <= 0) or (tonumber( new ) > 0 and tonumber( prev ) > 0) then return end
 			
 			if tonumber( new ) > 0 then
 				proxi:MountBeacons()
@@ -84,52 +50,79 @@ function proxi.Mount()
 				
 			end
 			
-		end)
+		end } )
 		
-		PROXI__CALLBACK_FUNC["proxi_core_enable"] = true
-		
-	end
+	self:CreateVarParam( "range", "global_finderdistance", "8192")
+	self:CreateVarParam( "range", "regmod_xrel", "0.2" )
+	self:CreateVarParam( "range", "regmod_yrel", "0.2")
+	self:CreateVarParam( "range", "regmod_size", "172")
+	self:CreateVarParam( "range", "regmod_pinscale", "5")
+	self:CreateVarParam( "range", "regmod_fov", "45")
+	self:CreateVarParam( "range", "regmod_radius", "2048")
+	self:CreateVarParam( "range", "regmod_angle", "50")
+	self:CreateVarParam( "range", "regmod_pitchdyn", "2")
+	self:CreateVarParam( "bool", "eyemod_override", "0")
+	self:CreateVarParam( "color", "uidesign_ringcolor", {147, 201, 224, 255} )
+	self:CreateVarParam( "color", "uidesign_backcolor", {32, 37, 43, 128} )
+	
+	
+	self.cmdGroups = {}
+	self.cmdGroups.call = {}
+	self:AppendCmd( self.cmdGroups.call, "changelog", function() self.ShowChangelog( self ) end )
+	self:AppendCmd( self.cmdGroups.call, "menu", function() self.OpenMenu( self ) end )
+	self:AppendCmd( self.cmdGroups, "menu", function() self.OpenMenu( self ) end )
+	self:AppendCmd( self.cmdGroups, "+menu", function() self.OpenMenu( self ) end )
+	self:AppendCmd( self.cmdGroups, "-menu", function() self.CloseMenu( self ) end )
+	
+	self.cmdGroupsNoRemove = {}
+	self:AppendCmd( self.cmdGroupsNoRemove, "cloud_locale", proxi.ReloadFromLocale )
+	
+	self:BuildCmds( self.cmdGroups, "" )
+	self:BuildCmds( self.cmdGroupsNoRemove, "" )
+	
+	self:MountMenu()
 	
 	hook.Add( "Think", "proxi.QuickThink", proxi.QuickThink )
 	hook.Add( "HUDPaint", "proxi.HUDPaint", proxi.HUDPaint )
 	
-	if proxi.MountMenu then
-		proxi.MountMenu()
-	end
-	
 	proxi:RemoveAllPhysicalTags()
 	proxi:MountBeacons( )
 
-	print("[ " .. PROXI_NAME .. " is now mounted. ]")
-	print("")
+	proxi_util.OutputIn( "Mount complete : " .. (proxi_internal.IsUsingCloud() and "Cloud" or "Locale") )
+	proxi_util.OutputLineBreak( )
 	
 end
 
 function proxi.Unmount()
-	print("")
-	print("] Unmounting " .. PROXI_NAME .. " ... [")
+	local self = proxi
 
 	local bOkay, strErr = pcall(function()
 		-- Insert parachute Unmount
+		
+		proxi_util.OutputLineBreak( )
+		proxi_util.OutputOut( "Unmounting ..." )
+		
+		self:DestroyChangelog()
+		self:UnmountMenu()
+		self:DismountCmds( self.cmdGroups )
 		
 		proxi_simmap = nil
 		hook.Remove( "HUDPaint", "proxi.HUDPaint" )
 		hook.Remove( "Think", "proxi.QuickThink" )
 		
-		if proxi.UnmountMenu then
-			proxi.UnmountMenu()
-		end
+		
+		proxi_util.OutputOut( "Unmount complete." )
+		proxi_util.OutputLineBreak( )
 		
 	end)
 	if not bOkay then
-		print("[<<< " .. PROXI_NAME .. " failed to unmount properly : " .. tostring(strErr) .. " ]")
+		proxi_util.OutputError( tostring(strErr) , "while unmounting" )
 		
 	end
 	
+	-- Don't remove proxi_util
+	-- proxi_util = {}
 	proxi = nil
-	
-	print("[ " .. PROXI_NAME .. " is now unmounted. ]")
-	print("")
 	
 end
 

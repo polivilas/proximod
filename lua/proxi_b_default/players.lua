@@ -35,7 +35,7 @@ end
 
 function BEACON:DrawUnderCircle( ent )
 	local thisMathPool = self.myMathPool[ ent ]
-	local cfP, cfAP = proxi:Util_CalcPowerUniform( thisMathPool.closeFalloff )
+	local cfP, cfAP = thisMathPool.closeFalloff ^ 2, proxi_util.PercentCharge( thisMathPool.closeFalloff )
 	
 	render.SetMaterial( self.myMaterial )
 	render.DrawBeam( thisMathPool.posToProj, thisMathPool.posToProj + Vector( 0, 0, 92 ), 10, 0.3, 1, Color( 255, 255, 255, 255 * cfP ) )

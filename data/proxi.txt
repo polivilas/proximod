@@ -1,3 +1,5 @@
+0.2
+Proxi is now using HayFrame, including a redesigned menu.
 0.123
 Wallfinder Pierce-Traceback performs a wall-angle estimation in order to get more precision on closer walls.
 &
