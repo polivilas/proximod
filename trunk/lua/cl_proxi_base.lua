@@ -22,6 +22,20 @@ function proxi.IsEnabled()
 
 end
 
+function proxi.ReloadFromCloud()
+	if proxi_cloud then
+		proxi_cloud:Ask()
+	end
+	
+end
+
+function proxi.ReloadFromLocale()
+	if proxi_cloud then
+		proxi_cloud:LoadLocale()
+	end
+	
+end
+
 function proxi.QuickThink()
 	proxi:UpdateBeacons()
 
