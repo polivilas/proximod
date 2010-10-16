@@ -231,7 +231,7 @@ function proxi:BuildMenu()
 				local category = vgui.Create("ProxiCollapsibleCheckbox", refPanel)
 				category:SetExpanded( false )
 				category:SetText( objBeacon:GetDisplayName() )
-				category:SetConVar( "proxi_beacons_enable_" .. sName )
+				category:SetConVar( self:GetVarName( "beacons_enable_" .. sName ) )
 				
 				category.List  = vgui.Create("DPanelList", category )
 				category.List:EnableHorizontal( false )
