@@ -68,6 +68,7 @@ function proxi.Mount()
 	
 	self.cmdGroups = {}
 	self.cmdGroups.call = {}
+	self:AppendCmd( self.cmdGroups, "core_enable", function(p,c,args) self:SetVar("core_enable", args[1] ) end )
 	self:AppendCmd( self.cmdGroups.call, "changelog", function() self.ShowChangelog( self ) end )
 	self:AppendCmd( self.cmdGroups.call, "menu", function() self.OpenMenu( self ) end )
 	self:AppendCmd( self.cmdGroups, "menu", function() self.OpenMenu( self ) end )
