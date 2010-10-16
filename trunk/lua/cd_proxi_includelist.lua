@@ -3,9 +3,17 @@
 ADDON_PROP = {}
 ---- Preload
 table.insert( ADDON_PROP, "cl_proxi_base.lua" )
-table.insert( ADDON_PROP, "cl_proxi_cvar_custom.lua" )
-table.insert( ADDON_PROP, "cl_proxi_util.lua" )
---table.insert( ADDON_PROP, "cl_proxi_ph_simmap.lua" )
+
+local HAYFRAME_DIR = "proxi_hayframe/"
+table.insert( ADDON_PROP, HAYFRAME_DIR .. "hayframe__initializer.lua" )
+table.insert( ADDON_PROP, HAYFRAME_DIR .. "hayframe_util.lua" )
+table.insert( ADDON_PROP, HAYFRAME_DIR .. "hayframe_var.lua" )
+table.insert( ADDON_PROP, HAYFRAME_DIR .. "hayframe_cmds.lua" )
+table.insert( ADDON_PROP, HAYFRAME_DIR .. "hayframe_mediator.lua" )
+table.insert( ADDON_PROP, HAYFRAME_DIR .. "hayframe_changelog.lua" )
+table.insert( ADDON_PROP, HAYFRAME_DIR .. "hayframe_ctrlcolor.lua" )
+table.insert( ADDON_PROP, HAYFRAME_DIR .. "hayframe_context.lua" )
+
 table.insert( ADDON_PROP, "cl_proxi_dup_virtualscene.lua" )
 
 ---- Beacons
@@ -29,7 +37,4 @@ table.insert( ADDON_PROP, "proxi_b_default/wallfinderpierceback.lua" )
 
 ---- Menu
 table.insert( ADDON_PROP, "ProxiCollapsibleCheckbox.lua" )
-table.insert( ADDON_PROP, "cl_proxi_ctrlcolor.lua" )
-table.insert( ADDON_PROP, "cl_proxi_menuutils.lua" )
-table.insert( ADDON_PROP, "cl_proxi_changelog.lua" )
 table.insert( ADDON_PROP, "cl_proxi_menu.lua" )

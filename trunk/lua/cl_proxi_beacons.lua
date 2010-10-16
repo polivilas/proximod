@@ -6,6 +6,7 @@
 //--------------------------------------------//
 // Beacons System                             //
 ////////////////////////////////////////////////
+local proxi = proxi
 
 -- Won't make a metatable because there are so few base functions
 
@@ -205,7 +206,7 @@ end
 local BEACON = {}
 
 function BEACON:IsEnabled( )
-	return proxi.GetVar("proxi_beacons_enable_" .. self._rawname) > 0
+	return proxi:GetVar("beacons_enable_" .. self._rawname) > 0
 	
 end
 
@@ -225,7 +226,7 @@ function BEACON:GetDescription( )
 end
 
 function BEACON:GetBarnstar()
-	return proxi.GetVar( "proxi_beacons_barnstar_" .. self._rawname )
+	return proxi:GetVar( "beacons_barnstar_" .. self._rawname )
 	
 end
 
@@ -238,7 +239,7 @@ function BEACON:HasBypassDistance( )
 end
 
 function BEACON:IsBypassingDistance( )
-	return not self._CanBypassDistance or (proxi.GetVar( "proxi_beacons_settings_" .. self._rawname .. "__bypassdistance" ) > 0)
+	return not self._CanBypassDistance or (proxi:GetVar( "beacons_settings_" .. self._rawname .. "__bypassdistance" ) > 0)
 end
 
 function BEACON:IsEntityOffLimits( ent, viewData, optb_forceTest )
@@ -293,7 +294,10 @@ local proxi_beacon_meta = {__index=BEACON}
 
 
 -- LIBVAR
+
 function proxi.RegisterBeacon( objBeacon, sName )
+	proxi:RequireParameterMediator( )
+	
 	if not objBeacon or not sName then return end
 	sName = string.lower( sName )
 	if string.find( sName, " " ) or string.find( sName, "_" ) or PROXI_BEACONS[sName] then return end
@@ -332,34 +336,26 @@ function proxi.RegisterBeacon( objBeacon, sName )
 	PROXI_BEACONS[sName] = objBeacon
 	table.insert( PROXI_BEACONORDER, sName )
 	
-	proxi.CreateVar("proxi_beacons_enable_" .. sName, (objBeacon.DefaultOn or false) and "1" or "0")
-	proxi.CreateVar("proxi_beacons_barnstar_" .. sName, "0", true, false)
+	proxi:CreateVarParam("bool", "beacons_barnstar_" .. sName, "0", true, false)
 	if objBeacon._CanBypassDistance then
-		proxi.CreateVar("proxi_beacons_settings_" .. sName .. "__bypassdistance", (objBeacon.DefaultBypassDistance or false) and "1" or "0")
+		proxi:CreateVarParam("bool", "beacons_settings_" .. sName .. "__bypassdistance", (objBeacon.DefaultBypassDistance or false) and "1" or "0")
 	
 	end
-	
-
-	if not PROXI__CALLBACK_FUNC[ "proxi_beacons_enable_" .. sName ] then
-		cvars.AddChangeCallback( "proxi_beacons_enable_" .. sName , function( sCvar, prev, new )
-			local name = string.gsub( sCvar, "proxi_beacons_enable_", "" )
+	proxi:CreateVarParam("bool", "beacons_enable_" .. sName, (objBeacon.DefaultOn or false) and "1" or "0", function( sCvar, prev, new )
+		local name = string.gsub( sCvar, "beacons_enable_", "" )
+		
+		if not proxi then return end
+		if not proxi.GetAllBeacons or not proxi:GetAllBeacons() or not proxi:GetAllBeacons()[ sName ]  then return end
+		
+		if tonumber( new ) > 0 then
+			proxi:GetAllBeacons()[ sName ]:Mount()
+		
+		else
+			proxi:GetAllBeacons()[ sName ]:Unmount()
 			
-			if not proxi then return end
-			if not proxi.GetAllBeacons or not proxi:GetAllBeacons() or not proxi:GetAllBeacons()[ sName ]  then return end
-			if (tonumber( new ) <= 0 and tonumber( prev ) <= 0) or (tonumber( new ) > 0 and tonumber( prev ) > 0) then return end
-			
-			if tonumber( new ) > 0 then
-				proxi:GetAllBeacons()[ sName ]:Mount()
-			
-			else
-				proxi:GetAllBeacons()[ sName ]:Unmount()
-				
-			end
-			
-		end)
-		PROXI__CALLBACK_FUNC[ "proxi_beacons_enable_" .. sName ] = true
-	
-	end
+		end
+		
+	end)
 	
 	setmetatable(objBeacon, proxi_beacon_meta)
 	

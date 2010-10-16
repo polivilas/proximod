@@ -34,7 +34,7 @@ function BEACON:DrawUnderCircle( ent )
 	
 	if thisMathPool.ratio > 2 then return end
 
-	local cfP, cfAP = proxi:Util_CalcPowerUniform( thisMathPool.closeFalloff )
+	local cfP, cfAP = thisMathPool.closeFalloff ^ 2, proxi_util.PercentCharge( thisMathPool.closeFalloff )
 	
 	render.SetMaterial( self.myMaterial )
 	render.DrawSprite( thisMathPool.conePos, 32, 32, Color( 255, 255, 255, 255 * cfAP ) ) ////

@@ -6,6 +6,7 @@
 //--------------------------------------------//
 // Virtual Scene                              //
 ////////////////////////////////////////////////
+local proxi = proxi
 
 local RING_TEX_ID = surface.GetTextureID( "proxi/rad_ring.vmt" )
 local RING_MATFIX = 1.07
@@ -13,11 +14,11 @@ local PROXI_CURRENT_VIEWDATA = nil
 local PROXI_CALC_SCREENPOS = nil
 
 function proxi:GetPinScale()
-	return self.GetVar( "proxi_regmod_size" ) / 256 * self.GetVar( "proxi_regmod_pinscale" ) / 5
+	return self:GetVar( "regmod_size" ) / 256 * self:GetVar( "regmod_pinscale" ) / 5
 end
 
 function proxi:GetPin3DScale( )
-	return self.GetVar( "proxi_regmod_pinscale" ) / 5
+	return self:GetVar( "regmod_pinscale" ) / 5
 end
 
 function proxi.HUDPaint()
@@ -28,7 +29,7 @@ function proxi.HUDPaint()
 		proxi.dat.view_data = {}
 	end
 	
-	if proxi.GetVar("proxi_eyemod_override") <= 0 then
+	if proxi:GetVar( "eyemod_override") <= 0 then
 		proxi:RecomRegular()
 		proxi:RegularEvaluate()
 		
@@ -53,19 +54,19 @@ function proxi:EyemodEvaluate()
 	self.dat.view_data.drawx = ScrW() / 2 - size / 2
 	self.dat.view_data.drawy = ScrH() / 2 - size / 2
 	self.dat.view_data.foveval    = LocalPlayer():GetFOV()
-	self.dat.view_data.bypass_distance = proxi.GetVar("proxi_global_finderdistance")
+	self.dat.view_data.bypass_distance = proxi:GetVar( "global_finderdistance")
 	
 end
 
 function proxi:RegularEvaluate()
-	local size = proxi.GetVar("proxi_regmod_size")
+	local size = proxi:GetVar( "regmod_size")
 	self.dat.view_data.draww = size
 	self.dat.view_data.drawh = size
-	self.dat.view_data.drawx = proxi.GetVar("proxi_regmod_xrel") * ScrW() - size / 2
-	self.dat.view_data.drawy = proxi.GetVar("proxi_regmod_yrel") * ScrH() - size / 2
-	self.dat.view_data.foveval    = proxi.GetVar("proxi_regmod_fov")
-	self.dat.view_data.radiuseval = proxi.GetVar("proxi_regmod_radius")
-	self.dat.view_data.bypass_distance = proxi.GetVar("proxi_global_finderdistance")
+	self.dat.view_data.drawx = proxi:GetVar( "regmod_xrel") * ScrW() - size / 2
+	self.dat.view_data.drawy = proxi:GetVar( "regmod_yrel") * ScrH() - size / 2
+	self.dat.view_data.foveval    = proxi:GetVar( "regmod_fov")
+	self.dat.view_data.radiuseval = proxi:GetVar( "regmod_radius")
+	self.dat.view_data.bypass_distance = proxi:GetVar( "global_finderdistance")
 	
 end
 
@@ -130,7 +131,7 @@ function proxi:RecomRegular()
 		
 	end
 	self.dat.view_data.ang_func = function( viewData )
-		return Angle( proxi.GetVar("proxi_regmod_angle") + (proxi.GetVar("proxi_regmod_pitchdyn") / 10) * viewData.referenceang.p, viewData.referenceang.y, 0 )
+		return Angle( proxi:GetVar( "regmod_angle") + (proxi:GetVar( "regmod_pitchdyn") / 10) * viewData.referenceang.p, viewData.referenceang.y, 0 )
 	end
 	
 	self.dat.view_data.referencepos = nil
@@ -211,7 +212,7 @@ function proxi:RecomC()
 		
 	end
 	self.dat.view_data.ang_func = function( viewData )
-		return Angle( proxi.GetVar("proxi_regmod_angle") + (proxi.GetVar("proxi_regmod_pitchdyn") / 10) * viewData.referenceang.p, viewData.referenceang.y, 0 )
+		return Angle( proxi:GetVar( "regmod_angle") + (proxi:GetVar( "regmod_pitchdyn") / 10) * viewData.referenceang.p, viewData.referenceang.y, 0 )
 	end
 	
 	self.dat.view_data.referencepos = nil
@@ -281,7 +282,7 @@ function proxi:DoRenderVirtualScene( viewData )
 	render.SetStencilReferenceValue( 1 )
 	
 	---- Background circle
-	surface.SetDrawColor( self:Util_GetVarColorVariadic( "proxi_uidesign_backcolor") )
+	surface.SetDrawColor( proxi:GetVarColorVariadic("uidesign_backcolor") )
 	surface.SetTexture( nil )
 	surface.DrawPoly( self:CalcCircle( 36, iWidth / 2, viewData.drawx, viewData.drawy ) )
 	
@@ -311,7 +312,7 @@ function proxi:DoRenderVirtualScene( viewData )
 	
 	local iSurfWidth, iSurfHeight    = iWidth * RING_MATFIX, iHeight * RING_MATFIX
 	local iDrawXCenter, iDrawYCenter = xDraw + iWidth / 2, yDraw + iHeight / 2
-	surface.SetDrawColor( self:Util_GetVarColorVariadic( "proxi_uidesign_ringcolor") )
+	surface.SetDrawColor( proxi:GetVarColorVariadic("uidesign_ringcolor") )
 	surface.SetTexture( RING_TEX_ID )
 	surface.DrawTexturedRectRotated( iDrawXCenter, iDrawYCenter, iSurfWidth, iSurfHeight, 0)
 	
@@ -444,7 +445,7 @@ function proxi:GetFalloff( tMath, iFallOff, optbExtras )
 		return tMath.closeFalloff
 		
 	else
-		return tMath.closeFalloff, self:Util_CalcPowerUniform( tMath.closeFalloff )
+		return tMath.closeFalloff, tMath.closeFalloff ^ 2, self:PercentCharge( tMath.closeFalloff )
 		
 	end
 	

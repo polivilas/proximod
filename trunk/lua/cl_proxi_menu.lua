@@ -6,303 +6,351 @@
 //--------------------------------------------//
 // Menu                                       //
 ////////////////////////////////////////////////
+local proxi = proxi
 
-function proxi.MenuCall_ReloadFromCloud()
-	if proxi_cloud then
-		proxi_cloud:Ask()
-	end
+local PROXI_MENU = nil
+
+function proxi:GetMenu()
+	return PROXI_MENU or self:BuildMenu()
 	
 end
 
-function proxi.MenuCall_ReloadFromLocale()
-	if proxi_cloud then
-		proxi_cloud:LoadLocale()
-	end
-	
-end
-
-function proxi.BuildMenu( opt_tExpand )
-	if proxi.DermaPanel then proxi.DermaPanel:Remove() end
-	
-	local bCanGetVersion = proxi_internal ~= nil
-	local MY_VERSION, ONLINE_VERSION, DOWNLOAD_LINK
-	local ONLINE_VERSION_READ = -1
-	if bCanGetVersion then
-		MY_VERSION, ONLINE_VERSION, DOWNLOAD_LINK = proxi_internal.GetVersionData()
-		
-		if ONLINE_VERSION == -1 then
-			ONLINE_VERSION_READ = "<offline>"
-		else
-			ONLINE_VERSION_READ = tostring( ONLINE_VERSION )
-		end
-		
-	end
-	
-	proxi.DermaPanel = proxi.Util_MakeFrame( 280, ScrH() * 0.80 )
-	local refPanel = proxi.DermaPanel
-	
-	proxi.Util_MakeCategory( refPanel, "General", 1 )
-	proxi.Util_AppendCheckBox( refPanel, "Enable" , "proxi_core_enable" )
-	
-	--Helper label
-	do
-		local GeneralTextLabelMessage = "The command \"proxi_menu\" calls this menu.\n"
-		GeneralTextLabelMessage = GeneralTextLabelMessage .. "Example : To assign " .. PROXI_NAME .. " menu to F10, type in the console :"
-		
-		proxi.Util_AppendLabel( refPanel, GeneralTextLabelMessage, 50, true )
-		
-		local GeneralCommandLabel = vgui.Create("DTextEntry")
-		GeneralCommandLabel:SetText( "bind \"F10\" \"proxi_menu\"" )
-		GeneralCommandLabel:SetEditable( false )
-
-		proxi.Util_AppendPanel( refPanel, GeneralCommandLabel )
-		
-	end
-	
-	
-	--Update label
-	do
-		if bCanGetVersion and (MY_VERSION and ONLINE_VERSION and (MY_VERSION < ONLINE_VERSION)) then
-			GeneralTextLabelMessage = "Your version is "..MY_VERSION.." and the updated one is "..ONLINE_VERSION.." ! You should update !"
-			proxi.Util_AppendLabel( refPanel, GeneralTextLabelMessage, 50, true )
-			
-			local CReload = vgui.Create("DButton")
-			CReload:SetText( "Open full Changelog" )
-			CReload.DoClick = proxi.ShowChangelog
-			proxi.Util_AppendPanel( refPanel, CReload )
-			
-			proxi.Util_AppendLabel( refPanel, "" )
-			
-			if ONLINE_VERSION and ONLINE_VERSION ~= -1 then
-				local myVer = MY_VERSION or 0
-				
-				local contents = proxi_internal.GetReplicate() or ( tostring( MY_VERSION or 0 ) .. "\n<Nothing to show>" )
-				local split = string.Explode( "\n", contents )
-				if (#split % 2) == 0 then
-					local dList = vgui.Create("DListView")
-					dList:SetMultiSelect( false )
-					dList:SetTall( 150 )
-					dList:AddColumn( "Ver." ):SetMaxWidth( 45 ) -- Add column
-					dList:AddColumn( "Log" )
-					
-					local gotMyVer = false
-					local i = 1
-					while (i <= #split) and not gotMyVer do
-						local iVer = tonumber( split[i] or 0 ) or 0
-						if not gotMyVer and iVer ~= 0 and iVer <= myVer and (split[i+2] ~= "&") then
-							dList:AddLine( "*" .. myVer .. "*", "< Locale version >" )
-							gotMyVer = true
-							
-						else
-							local myLine = dList:AddLine( (split[i] ~= "&") and split[i] or "", split[i+1] or "" )
-							myLine:SizeToContents()
-							
-						end
-						
-						i = i + 2
-						
-					end
-					
-					proxi.Util_AppendPanel( refPanel, dList )
-					
-				end
-				
-			end
-			
-		end
-		
-	end
-	
-	-- Style
-	proxi.Util_MakeCategory( refPanel, "Regular Mode", 1 )
-	proxi.Util_AppendSlider( refPanel, "X Relative Position", "proxi_regmod_xrel", 0, 1, 2)
-	proxi.Util_AppendSlider( refPanel, "Y Relative Position", "proxi_regmod_yrel", 0, 1, 2)
-	proxi.Util_AppendSlider( refPanel, "Circle Size", "proxi_regmod_size", 32, 1024, 0)
-	proxi.Util_AppendSlider( refPanel, "Pin Scale", "proxi_regmod_pinscale", 0, 10, 0)
-	proxi.Util_AppendLabel( refPanel, "WARNING : The greater the Radius is, the more perspective should you set it up, otherwise 3D beacons won't dislay at all.", 50 )
-	proxi.Util_AppendSlider( refPanel, "Isometric < > Perspective", "proxi_regmod_fov", 2, 100, 0)
-	proxi.Util_AppendSlider( refPanel, "In-world Radius", "proxi_regmod_radius", 128, 4096, 0)
-	proxi.Util_AppendSlider( refPanel, "Pitch Angle", "proxi_regmod_angle", -90, 90, 0)
-	proxi.Util_AppendSlider( refPanel, "Pitch Dynamism", "proxi_regmod_pitchdyn", 0, 10, 0)
-	
-	-- EyeMod
-	proxi.Util_MakeCategory( refPanel, "Eye Mode", 1 )
-	proxi.Util_AppendCheckBox( refPanel, "Debug" , "proxi_eyemod_override" )
-	
-	
-	-- UI Design
-	proxi.Util_MakeCategory( refPanel, "UI Design", 0 )
-	proxi.Util_AppendLabel( refPanel, "Ring color" )
-	proxi.Util_AppendColor( refPanel, "proxi_uidesign_ringcolor")
-	proxi.Util_AppendLabel( refPanel, "Background color" )
-	proxi.Util_AppendColor( refPanel, "proxi_uidesign_backcolor")
-	
-	-- Global Beacons parameters
-	proxi.Util_MakeCategory( refPanel, "Global Finder", 1 )
-	proxi.Util_AppendLabel( refPanel, "NOTE : Beacons are able to bypass this distance using a checkbox.", 50 )
-	proxi.Util_AppendSlider( refPanel, "Beacon finder distance", "proxi_global_finderdistance", 1024, 16384, 0)
-	
-	-- Beacons
-	proxi.Util_MakeCategory( refPanel, "Beacons", 1 )
-	do
-		local cat = proxi.Util_CatchCurrentCategory( refPanel )
-		cat.List:SetSpacing( 5 )
-		
-	end
-	
-	do
-		local beacons = proxi:GetAllBeacons()
-		for _,sName in pairs( proxi:GetBeaconOrderTable() ) do
-			local objBeacon = beacons[ sName ]
-			
-			local category = vgui.Create("ProxiCollapsibleCheckbox", refPanel)
-			category:SetExpanded( false )
-			category:SetText( objBeacon:GetDisplayName() )
-			category:SetConVar( "proxi_beacons_enable_" .. sName )
-			
-			category.List  = vgui.Create("DPanelList", category )
-			category.List:EnableHorizontal( false )
-			category.List:EnableVerticalScrollbar( false )
-			
-			/*local label = vgui.Create( "DLabel", category )
-			label:SetText( objBeacon:GetDescription() or "No description" )
-			category.List:AddItem( label )*/
-			
-			if objBeacon:HasBypassDistance() then
-				category.List:AddItem( proxi.Util_CreateCheckBox( "Bypass distance limit" , "proxi_beacons_settings_" .. sName .. "__bypassdistance") )
-				
-			end
-			
-			category:SetContents( category.List )
-			
-			proxi.Util_AppendPanel( refPanel, category )
-			
-		end
-		
-	end
-	
-	
-	
-	if proxi_internal.IsUsingCloud then
-		if proxi_internal.IsUsingCloud() then
-			proxi.Util_MakeCategory( refPanel, "Using Cloud" .. (bCanGetVersion and (" [ v" .. tostring(MY_VERSION) .. " >> v" .. tostring(ONLINE_VERSION_READ) .. " ]") or " Version" ), 0 )
-		
-		else
-			proxi.Util_MakeCategory( refPanel, "Using Locale" .. (bCanGetVersion and (" [ v" .. tostring(MY_VERSION) .. " >> v" .. tostring(ONLINE_VERSION_READ) .. " ]") or " Version" ), 0 )
-			
-		end
+function proxi:UpdateMenuPosition()
+	local pos = self:GetVar( "menu_position" )
+	if pos > 0 then
+		PROXI_MENU:SetPos( ScrW() - PROXI_MENU:GetWide(), 0 )
+		PROXI_MENU:GetContents()._p_topPanel._p_positionBox:SetType( "left" )
 		
 	else
-		proxi.Util_MakeCategory( refPanel, "Cloud" .. (bCanGetVersion and (" [ v" .. tostring(MY_VERSION) .. " >> v" .. tostring(ONLINE_VERSION_READ) .. " ]") or " Version" ), 0 )
+		PROXI_MENU:SetPos( 0, 0 )
+		PROXI_MENU:GetContents()._p_topPanel._p_positionBox:SetType( "right" )
 		
 	end
 	
-	-- Reload from Cloud Button
+end
+
+function proxi:BuildMenuContainer()
+	self:RemoveMenu()
+	
+	local WIDTH = 230
+	PROXI_MENU = vgui.Create( PROXI_SHORT .. "_ContextContainer" )
+	PROXI_MENU:SetSize( WIDTH, ScrH() )
+	PROXI_MENU:GetCanvas( ):SetDrawBackground( false )
+	
+	local mainPanel = vgui.Create( "DPanel" )
+	PROXI_MENU:SetContents( mainPanel )
+	
+	///
+	
+	//mainPanel:SetDrawBackground( false )
+	/*mainPanel.Paint = function (self)
+		surface.SetDrawColor( 255, 0, 0, 96 )
+		surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
+	end*/
+	
+	PROXI_MENU.Paint = function (self)
+		surface.SetDrawColor( 0, 0, 0, 96 )
+		surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
+	end
+	
+	mainPanel.Paint = function (self)
+		surface.SetDrawColor( 0, 0, 0, 96 )
+		surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
+	end
+	
+	return PROXI_MENU
+	
+end
+
+function proxi:BuildMenu()
+	if not ValidPanel( PROXI_MENU ) then
+		self:BuildMenuContainer()
+		
+	end
+	
+	local mainPanel = PROXI_MENU:GetContents()
+	
+	////
+	local topPanel = vgui.Create( "DPanel", mainPanel )
 	do
-		local CReload = vgui.Create("DButton")
-		CReload:SetText( "Reload from Cloud" )
-		CReload.DoClick = proxi.MenuCall_ReloadFromCloud
-		proxi.Util_AppendPanel( refPanel, CReload )
-	end
-	
-	-- Reload from Locale Button
-	if proxi_internal then
-		local CReload = vgui.Create("DButton")
-		CReload:SetText( "Reload from Locale" )
-		CReload.DoClick = proxi.MenuCall_ReloadFromLocale
-		proxi.Util_AppendPanel( refPanel, CReload )
-	end
-	
-	-- Changelog Button
-	if proxi_internal and proxi_internal.GetReplicate then
-		proxi.Util_AppendLabel( refPanel, "" )
+		local title = self:BuildParamPanel( "noconvar", { Type = "panel_label", Text = PROXI_NAME, ContentAlignment = 5, Font = "DefaultBold" } )
+		title.Paint = function (self)
+			surface.SetDrawColor( 0, 0, 0, 96 )
+			surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
+		end
+		title:SetParent( topPanel )
 		
-		local CChangelog = vgui.Create("DButton")
-		CChangelog:SetText( "Open Changelog" )
-		CChangelog.DoClick = proxi.ShowChangelog
-		proxi.Util_AppendPanel( refPanel, CChangelog )
+		local subTitle = nil
+		do
+			local MY_VERSION, ONLINE_VERSION = proxi_internal.GetVersionData()
+			MY_VERSION = "v" .. tostring(MY_VERSION)
+			ONLINE_VERSION = (ONLINE_VERSION == -1) and "(?)" or ("v" .. tostring( ONLINE_VERSION ))
+			subTitle = self:BuildParamPanel( "noconvar", { Type = "panel_label", Text = "Using " .. (proxi_cloud:IsUsingCloud() and "Cloud " .. ONLINE_VERSION or "Locale " .. MY_VERSION), ContentAlignment = 4 } )
+		end
+		subTitle:SetParent( topPanel )
+		
+		local MY_VERSION, ONLINE_VERSION = proxi_internal.GetVersionData()
+		if ((MY_VERSION < ONLINE_VERSION) and proxi_cloud:IsUsingCloud()) then
+			subTitle:SetToolTip( "There is an update ! You're currently using a temporary copy of the new version (You have v" .. tostring( MY_VERSION ) .. " installed)." )
+			subTitle.Think = function (self)
+				local blink = 127 + (math.sin( math.pi * CurTime() * 0.5 ) + 1 ) * 64
+				self:SetColor( Color( 255, 255, 255, blink ) ) // TODO : ?
+				
+			end
+			
+		end
+		
+		local enableBox = self:BuildParamPanel( "core_enable", { Type = "bool_nolabel", Style = "grip" } )
+		enableBox:SetParent( title )
+		enableBox:SetToolTip( "Toggle " .. tostring( PROXI_NAME ) .. "." )
+		enableBox.Paint = function (self)
+			local isEnabled = self:GetChecked()
+			if isEnabled then
+				--local blink = (math.sin( math.pi * CurTime() ) + 1 ) / 2 * 64
+				local blink = 222 + (math.sin( math.pi * CurTime() ) + 1 ) * 16
+				surface.SetDrawColor( blink, blink, blink, 255 )
+				
+			else
+				surface.SetDrawColor( 192, 192, 192, 255 )
+				
+			end
+			
+			surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
+			
+			surface.SetDrawColor( 0, 0, 0, 255 )
+			surface.DrawOutlinedRect( 0, 0, self:GetWide(), self:GetTall() )
+			
+			if not isEnabled and ( CurTime() % 1 > 0.5 ) then
+				surface.DrawOutlinedRect( 2, 2, self:GetWide() - 4, self:GetTall() - 4 )
+				
+			end
+			
+		end
+		
+		local positionBox = self:BuildParamPanel( "menu_position", { Type = "panel_sysbutton", Style = "left", DoClick = function ( self ) proxi:SetVar( "menu_position", (proxi:GetVar( "menu_position" ) > 0) and 0 or 1 ) end } )
+		positionBox:SetParent( title )
+		positionBox:SetToolTip( "Change addon dock position." )
+		
+		local reloadCloud = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/toybox", DoClick = function() RunConsoleCommand( "-proxi_menu" ) RunConsoleCommand( "proxi_cloud_ask" ) end } )
+		reloadCloud:SetParent( subTitle )
+		reloadCloud:SetToolTip( "Press to use the latest version from the Cloud." )
+		
+		local reloadLocale = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/application_put", DoClick = function() RunConsoleCommand( "-proxi_menu" ) RunConsoleCommand( "proxi_cloud_locale" ) end } )
+		reloadLocale:SetParent( subTitle )
+		reloadLocale:SetToolTip( "Press to use your Locale installed version." )
+		
+		local loadChangelog = self:BuildParamPanel( "noconvar", { Type = "panel_button", Text = "Changelog", DoClick = function() RunConsoleCommand( "proxi_call_changelog" ) end } )
+		loadChangelog:SetParent( subTitle )
+		loadChangelog:SetToolTip( "Press to view the changelog." )
+		
+		if MY_VERSION < ONLINE_VERSION then
+			loadChangelog.PaintOver = function ( self )
+				local blink = (math.sin( math.pi * CurTime() * 0.5 ) + 1 ) * 64
+				surface.SetDrawColor( 255, 255, 255, blink )
+				draw.RoundedBoxEx( 2, 0, 0, self:GetWide(), self:GetTall(), Color( 255, 255, 255, blink ), true, true, true, true  )
+				
+			end
+			loadChangelog:SetToolTip( "There are updates ! You should update your Locale." )
+			
+		else
+			loadChangelog:SetToolTip( "Press to view the changelog." )
+			
+		end
+		
+		
+		topPanel._p_title = title
+		topPanel._p_subTitle = subTitle
+		topPanel._p_enableBox = enableBox
+		topPanel._p_positionBox = positionBox
+		
+		topPanel._p_reloadCloud = reloadCloud
+		topPanel._p_reloadLocale = reloadLocale
+		topPanel._p_loadChangelog = loadChangelog
+	
+	end
+	topPanel.Paint = function (self)
+		surface.SetDrawColor( 0, 0, 0, 96 )
+		surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
+	end
+	topPanel.PerformLayout = function (self)
+		self:SetWide( self:GetParent():GetWide() )
+		self._p_title:SetWide( self:GetWide() )
+		self._p_subTitle:SetWide( self:GetWide() )
+		
+		self._p_title:PerformLayout( )
+		self._p_subTitle:PerformLayout( )
+		self._p_enableBox:PerformLayout( )
+		self._p_positionBox:PerformLayout( )
+		
+		self._p_reloadCloud:PerformLayout( )
+		self._p_reloadLocale:PerformLayout( )
+		self._p_loadChangelog:PerformLayout( )
+		
+		self._p_title:CenterHorizontal( )
+		self._p_subTitle:CenterHorizontal( )
+		
+		self:SetTall( self._p_title:GetTall() + self._p_subTitle:GetTall() )
+		
+		self._p_title:AlignTop( 0 )
+		self._p_subTitle:SetWide( self._p_subTitle:GetWide() - 4 )
+		self._p_subTitle:AlignLeft( 4 )
+		self._p_subTitle:MoveBelow( self._p_title, 0 )
+		
+		local boxSize = self._p_title:GetTall()
+		self._p_enableBox:SetSize( boxSize * 0.8, boxSize * 0.8 )
+		self._p_positionBox:SetSize( boxSize * 0.8, boxSize * 0.8 )
+		self._p_enableBox:CenterVertical( )
+		self._p_positionBox:CenterVertical( )
+		self._p_enableBox:AlignLeft( boxSize * 0.1 )
+		self._p_positionBox:AlignRight( boxSize * 0.1 )
+		
+		local buttonSize = self._p_subTitle:GetTall()
+		self._p_reloadCloud:SetSize( buttonSize * 0.8, buttonSize * 0.8 )
+		self._p_reloadLocale:SetSize( buttonSize * 0.8, buttonSize * 0.8 )
+		self._p_loadChangelog:SizeToContents( )
+		self._p_loadChangelog:SetSize( self._p_loadChangelog:GetWide() + 6, buttonSize * 0.8 )
+		self._p_reloadCloud:CenterVertical( )
+		self._p_reloadLocale:CenterVertical( )
+		self._p_loadChangelog:CenterVertical( )
+		self._p_reloadCloud:AlignRight( boxSize * 0.1 )
+		self._p_reloadLocale:MoveLeftOf( self._p_reloadCloud, boxSize * 0.1 )
+		self._p_loadChangelog:MoveLeftOf( self._p_reloadLocale, boxSize * 0.3 )
 	end
 	
-	proxi.Util_ApplyCategories( refPanel )
-	
-end
-
-
-function proxi.ShowMenuNoOverride( )
-	proxi.ShowMenu( true )
-end
-
-function proxi.ShowMenu( optbKeyboardShouldNotOverride )
-	if not proxi.DermaPanel then
-		proxi.BuildMenu()
+	////
+	local tabMaster = vgui.Create( "DPropertySheet", mainPanel )
+	do
+		local formBeacons = vgui.Create( "DPanelList" )
+		formBeacons:AddItem( self:BuildParamPanel( "global_finderdistance", { Type = "range", Text = "Global Finder : Distance limit", Min = 256, Max = 16384, Decimals = 0 } ) )
+		
+		do
+			local beacons = proxi:GetAllBeacons()
+			for _,sName in pairs( proxi:GetBeaconOrderTable() ) do
+				local objBeacon = beacons[ sName ]
+				
+				local category = vgui.Create("ProxiCollapsibleCheckbox", refPanel)
+				category:SetExpanded( false )
+				category:SetText( objBeacon:GetDisplayName() )
+				category:SetConVar( "proxi_beacons_enable_" .. sName )
+				
+				category.List  = vgui.Create("DPanelList", category )
+				category.List:EnableHorizontal( false )
+				category.List:EnableVerticalScrollbar( false )
+				
+				if objBeacon:HasBypassDistance() then
+					category.List:AddItem( self:BuildParamPanel( "beacons_settings_" .. sName .. "__bypassdistance", { Type = "bool", Text = "Bypass distance limit" } ) )
+				
+				else
+					category.Paint = function ( self )
+						surface.SetDrawColor( 0, 0, 0 )
+						surface.DrawRect( 0, 0, self:GetWide(), self:GetTall() )
+						
+					end
+				
+				end
+				
+				category:SetContents( category.List )
+				
+				formBeacons:AddItem( category )
+				
+			end
+			
+		end
+		
+		local formOptions = vgui.Create( "DPanelList" )
+		do
+			formOptions:AddItem( self:BuildParamPanel( "regmod_xrel", { Type = "range", Text = "X Relative Position", Min = 0, Max = 1, Decimals = 2 } ) )
+			formOptions:AddItem( self:BuildParamPanel( "regmod_yrel", { Type = "range", Text = "X Relative Position", Min = 0, Max = 1, Decimals = 2 } ) )
+			
+			formOptions:AddItem( self:BuildParamPanel( "regmod_size", { Type = "range", Text = "Circle Size", Min = 0, Max = 1024, Decimals = 0 } ) )
+			formOptions:AddItem( self:BuildParamPanel( "regmod_pinscale", { Type = "range", Text = "Pin Scale", Min = 0, Max = 10, Decimals = 0 } ) )
+			formOptions:AddItem( self:BuildParamPanel( "noconvars", { Type = "panel_label", Text = "WARNING : The greater the Radius is, the more perspective should you set it up, otherwise 3D beacons won't dislay at all." } ) )
+			
+			formOptions:AddItem( self:BuildParamPanel( "regmod_fov", { Type = "range", Text = "Isometric < > Perspective", Min = 2, Max = 100, Decimals = 0 } ) )
+			formOptions:AddItem( self:BuildParamPanel( "regmod_radius", { Type = "range", Text = "In-world Radius", Min = 128, Max = 4096, Decimals = 0 } ) )
+			formOptions:AddItem( self:BuildParamPanel( "regmod_angle", { Type = "range", Text = "Pitch Angle", Min = -90, Max = 90, Decimals = 0 } ) )
+			formOptions:AddItem( self:BuildParamPanel( "regmod_pitchdyn", { Type = "range", Text = "Pitch Dynamism", Min = 0, Max = 10, Decimals = 0 } ) )
+			
+			formOptions:AddItem( self:BuildParamPanel( "eyemod_override", { Type = "bool", Text = "Enable Eye Mod (Debug mode)" } ) )
+			
+		end
+		
+		local formDesign = vgui.Create( "DPanelList" )
+		do
+			formDesign:AddItem( self:BuildParamPanel( "noconvars", { Type = "panel_label", Text = "Ring color" } ) )
+			formDesign:AddItem( self:BuildParamPanel( "uidesign_ringcolor", { Type = "color" } ) )
+			formDesign:AddItem( self:BuildParamPanel( "noconvars", { Type = "panel_label", Text = "Background color" } ) )
+			formDesign:AddItem( self:BuildParamPanel( "uidesign_backcolor", { Type = "color" } ) )
+			
+		end
+		
+		tabMaster:AddSheet( "Beacons", formBeacons, "gui/silkicons/application_view_detail", false, false, "All your scripts." )
+		tabMaster:AddSheet( "Options", formOptions, "gui/silkicons/wrench", false, false, "Settings." )
+		tabMaster:AddSheet( "UI", formDesign, "gui/silkicons/wrench", false, false, "Appearance." )
+		
 	end
-	--proxi.DermaPanel:Center()
-	proxi.DermaPanel:MakePopup()
-	proxi.DermaPanel:SetKeyboardInputEnabled( not optbKeyboardShouldNotOverride )
-	proxi.DermaPanel:SetVisible( true )
-end
-
-function proxi.HideMenu()
-	if not proxi.DermaPanel then
-		return
+	
+	////
+	local optionsForm = vgui.Create( "DForm", mainPanel )
+	do
+		optionsForm:SetName( "Status" )
+		
+		local label = vgui.Create( "DLabel" )
+		label:SetText( "None." )
+		optionsForm:AddItem( label )
+		
 	end
-	proxi.DermaPanel:SetVisible( false )
-end
-
-function proxi.DestroyMenu()
-	if proxi.DermaPanel then
-		proxi.DermaPanel:Remove()
-		proxi.DermaPanel = nil
+	
+	////
+	mainPanel._p_topPanel = topPanel
+	mainPanel._p_tabMaster = tabMaster
+	mainPanel._p_optionsForm = optionsForm
+	
+	mainPanel._n_Spacing = 5
+	mainPanel.PerformLayout = function (self)
+		self:GetParent():StretchToParent( 0, 0, 0, 0 )
+		self:StretchToParent( self._n_Spacing, self._n_Spacing, self._n_Spacing, self._n_Spacing )
+		self._p_topPanel:PerformLayout()
+		self._p_tabMaster:PerformLayout()
+		self._p_optionsForm:PerformLayout()
+		self._p_topPanel:Dock( TOP )
+		self._p_optionsForm:Dock( BOTTOM )
+		self._p_tabMaster:Dock( FILL )
 	end
-end
-
-/////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
-//// SANDBOX PANEL .
-
-function proxi.Panel(Panel)	
-	Panel:AddControl("Checkbox", {
-			Label = "Enable", 
-			Description = "Enable", 
-			Command = "proxi_core_enable" 
-		}
-	)
-	Panel:AddControl("Button", {
-			Label = "Open Menu (proxi_menu)", 
-			Description = "Open Menu (proxi_menu)", 
-			Command = "proxi_menu"
-		}
-	)
 	
-	Panel:Help("To trigger the menu in any gamemode, type proxi_menu in the console, or bind this command to any key.")
-end
-
-function proxi.AddPanel()
-	spawnmenu.AddToolMenuOption("Options", "Player", PROXI_NAME, PROXI_NAME, "", "", proxi.Panel, {SwitchConVar = 'proxi_core_enable'})
+	PROXI_MENU:UpdateContents()
+	self:UpdateMenuPosition()
+	
+	return PROXI_MENU
 	
 end
 
-/////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
-// MOUNT FCTS.
-
-function proxi.MountMenu()
-	concommand.Add( "proxi_menu", proxi.ShowMenuNoOverride )
-	concommand.Add( "proxi_call_menu", proxi.ShowMenuNoOverride )
-	concommand.Add( "+proxi_menu", proxi.ShowMenu )
-	concommand.Add( "-proxi_menu", proxi.HideMenu )
+function proxi:RemoveMenu()
+	if ValidPanel( PROXI_MENU ) then
+		PROXI_MENU:Remove()
+		PROXI_MENU = nil
+	
+	end
 	
 end
 
-function proxi.UnmountMenu()
-	proxi.DestroyMenu()
-
-	concommand.Remove( "proxi_call_menu" )
-	concommand.Remove( "proxi_menu" )
-	concommand.Remove( "+proxi_menu" )
-	concommand.Remove( "-proxi_menu" )
+function proxi:MountMenu()
+	self:CreateVarParam( "bool", "menu_position", "1", { callback = function ( a, b, c ) proxi:UpdateMenuPosition() end } )
+	-- do nothing
 	
 end
 
-/////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
+function proxi:UnmountMenu()
+	self:RemoveMenu()
+	
+end
+
+function proxi:OpenMenu()
+	self:GetMenu():Open()
+	
+end
+
+function proxi:CloseMenu()
+	self:GetMenu():Close()
+	
+end
