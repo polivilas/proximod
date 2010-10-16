@@ -277,7 +277,7 @@ function proxi:BuildHeader( mainPanel, sHeaderName )
 		
 		local positionBox = self:BuildParamPanel( "noconvar", { Type = "panel_sysbutton", Style = "left", DoClick = function ( self ) proxi:SetVar( "menu_position", (proxi:GetVar( "menu_position" ) > 0) and 0 or 1 ) end } )
 		positionBox:SetParent( title )
-		positionBox:SetToolTip( "Change addon dock position." )
+		positionBox:SetToolTip( "Change menu dock position." )
 		
 		local reloadCloud = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/toybox", DoClick = function() proxi:CallCmd("-menu") proxi:ReloadFromCloud() end } )
 		reloadCloud:SetParent( subTitle )
