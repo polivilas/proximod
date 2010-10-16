@@ -127,19 +127,23 @@ function proxi:BuildMenu()
 			
 		end
 		
-		local positionBox = self:BuildParamPanel( "menu_position", { Type = "panel_sysbutton", Style = "left", DoClick = function ( self ) proxi:SetVar( "menu_position", (proxi:GetVar( "menu_position" ) > 0) and 0 or 1 ) end } )
+		local closeBox = self:BuildParamPanel( "noconvar", { Type = "panel_sysbutton", Style = "close", DoClick = function ( self ) proxi:CallCmd("-menu") end } )
+		closeBox:SetParent( title )
+		closeBox:SetToolTip( "Close menu." )
+		
+		local positionBox = self:BuildParamPanel( "noconvar", { Type = "panel_sysbutton", Style = "left", DoClick = function ( self ) proxi:SetVar( "menu_position", (proxi:GetVar( "menu_position" ) > 0) and 0 or 1 ) end } )
 		positionBox:SetParent( title )
 		positionBox:SetToolTip( "Change addon dock position." )
 		
-		local reloadCloud = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/toybox", DoClick = function() RunConsoleCommand( "-proxi_menu" ) RunConsoleCommand( "proxi_cloud_ask" ) end } )
+		local reloadCloud = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/toybox", DoClick = function() proxi:CallCmd("-menu") proxi:CallCmd("cloud_ask") end } )
 		reloadCloud:SetParent( subTitle )
 		reloadCloud:SetToolTip( "Press to use the latest version from the Cloud." )
 		
-		local reloadLocale = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/application_put", DoClick = function() RunConsoleCommand( "-proxi_menu" ) RunConsoleCommand( "proxi_cloud_locale" ) end } )
+		local reloadLocale = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/application_put", DoClick = function() proxi:CallCmd("-menu") proxi:CallCmd("cloud_locale") end } )
 		reloadLocale:SetParent( subTitle )
 		reloadLocale:SetToolTip( "Press to use your Locale installed version." )
 		
-		local loadChangelog = self:BuildParamPanel( "noconvar", { Type = "panel_button", Text = "Changelog", DoClick = function() RunConsoleCommand( "proxi_call_changelog" ) end } )
+		local loadChangelog = self:BuildParamPanel( "noconvar", { Type = "panel_button", Text = "Changelog", DoClick = function() proxi:CallCmd("call_changelog") end } )
 		loadChangelog:SetParent( subTitle )
 		loadChangelog:SetToolTip( "Press to view the changelog." )
 		
@@ -161,6 +165,7 @@ function proxi:BuildMenu()
 		topPanel._p_title = title
 		topPanel._p_subTitle = subTitle
 		topPanel._p_enableBox = enableBox
+		topPanel._p_closeBox = closeBox
 		topPanel._p_positionBox = positionBox
 		
 		topPanel._p_reloadCloud = reloadCloud
@@ -181,6 +186,7 @@ function proxi:BuildMenu()
 		self._p_subTitle:PerformLayout( )
 		self._p_enableBox:PerformLayout( )
 		self._p_positionBox:PerformLayout( )
+		self._p_closeBox:PerformLayout( )
 		
 		self._p_reloadCloud:PerformLayout( )
 		self._p_reloadLocale:PerformLayout( )
@@ -199,10 +205,13 @@ function proxi:BuildMenu()
 		local boxSize = self._p_title:GetTall()
 		self._p_enableBox:SetSize( boxSize * 0.8, boxSize * 0.8 )
 		self._p_positionBox:SetSize( boxSize * 0.8, boxSize * 0.8 )
+		self._p_closeBox:SetSize( boxSize * 0.8, boxSize * 0.8 )
 		self._p_enableBox:CenterVertical( )
 		self._p_positionBox:CenterVertical( )
+		self._p_closeBox:CenterVertical( )
 		self._p_enableBox:AlignLeft( boxSize * 0.1 )
 		self._p_positionBox:AlignRight( boxSize * 0.1 )
+		self._p_closeBox:MoveLeftOf( self._p_positionBox, boxSize * 0.1 )
 		
 		local buttonSize = self._p_subTitle:GetTall()
 		self._p_reloadCloud:SetSize( buttonSize * 0.8, buttonSize * 0.8 )

@@ -33,7 +33,11 @@ end
 
 // Should not ...
 function HAY_MAIN:CallCmd( sCmdName )
-	RunConsoleCommand( HAY_LOCAL_CONCMDPREFIX .. sCmdName )
+	local prefix = string.find( sCmdName, "+" ) and "+" or string.find( sCmdName, "-" ) and "-" or ""
+	sCmdName = string.gsub( sCmdName, "+", "" )
+	sCmdName = string.gsub( sCmdName, "-", "" )
+	
+	RunConsoleCommand( prefix .. HAY_LOCAL_CONCMDPREFIX .. sCmdName )
 	
 end
 

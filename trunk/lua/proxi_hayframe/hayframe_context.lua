@@ -23,7 +23,7 @@ end
 local function HAY_ContextContainer__GetFocus( objPanel )
 	local match = false
 	local i = 1
-	while (i >= #HAY_ContextContainerList) and not match do
+	while (i <= #HAY_ContextContainerList) and not match do
 		if not ValidPanel( HAY_ContextContainerList[ i ] ) then
 			table.remove( HAY_ContextContainerList, i )
 			
@@ -47,7 +47,7 @@ local function HAY_ContextContainer__EndFocus( objPanel )
 	
 	local match = false
 	local i = 1
-	while (i >= #HAY_ContextContainerList) and not match do
+	while (i <= #HAY_ContextContainerList) and not match do
 		if not ValidPanel( HAY_ContextContainerList[ i ] ) then
 			table.remove( HAY_ContextContainerList, i )
 			
