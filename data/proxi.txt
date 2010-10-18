@@ -1,3 +1,5 @@
+0.205
+Fixed Compass being not oriented correctly. North is now aligned to +Y.
 0.204
 Fixed FamiliarizeString issue on NPC beacon.
 0.203

@@ -28,10 +28,10 @@ function BEACON:Load()
 	self.myMaterial = Material( "proxi/beacon_flare_add" )
 	
 	self.Names = {}
-	self.Names[0] = "N"
-	self.Names[90] = "W"
-	self.Names[180] = "S"
-	self.Names[270] = "E"
+	self.Names[0] = "E"
+	self.Names[90] = "N"
+	self.Names[180] = "W"
+	self.Names[270] = "S"
 end
 
 ---- StandAlone beacons don't need tagging.

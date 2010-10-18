@@ -116,11 +116,11 @@ function proxi:BuildMenu()
 		local formOptions = vgui.Create( "DPanelList" )
 		do
 			formOptions:AddItem( self:BuildParamPanel( "regmod_xrel", { Type = "range", Text = "X Relative Position", Min = 0, Max = 1, Decimals = 2 } ) )
-			formOptions:AddItem( self:BuildParamPanel( "regmod_yrel", { Type = "range", Text = "X Relative Position", Min = 0, Max = 1, Decimals = 2 } ) )
+			formOptions:AddItem( self:BuildParamPanel( "regmod_yrel", { Type = "range", Text = "Y Relative Position", Min = 0, Max = 1, Decimals = 2 } ) )
 			
 			formOptions:AddItem( self:BuildParamPanel( "regmod_size", { Type = "range", Text = "Circle Size", Min = 0, Max = 1024, Decimals = 0 } ) )
 			formOptions:AddItem( self:BuildParamPanel( "regmod_pinscale", { Type = "range", Text = "Pin Scale", Min = 0, Max = 10, Decimals = 0 } ) )
-			formOptions:AddItem( self:BuildParamPanel( "noconvars", { Type = "panel_label", Text = "WARNING : The greater the Radius is, the more perspective should you set it up, otherwise 3D beacons won't dislay at all." } ) )
+			formOptions:AddItem( self:BuildParamPanel( "noconvars", { Type = "panel_label", Text = "WARNING : The greater the Radius is, the more perspective should you set it up, otherwise 3D beacons won't dislay at all.", Wrap = true } ) )
 			
 			formOptions:AddItem( self:BuildParamPanel( "regmod_fov", { Type = "range", Text = "Isometric < > Perspective", Min = 2, Max = 100, Decimals = 0 } ) )
 			formOptions:AddItem( self:BuildParamPanel( "regmod_radius", { Type = "range", Text = "In-world Radius", Min = 128, Max = 4096, Decimals = 0 } ) )
@@ -273,7 +273,6 @@ function proxi:BuildHeader( mainPanel, sHeaderName )
 		
 		local closeBox = self:BuildParamPanel( "noconvar", { Type = "panel_sysbutton", Style = "close", DoClick = function ( self ) proxi:CallCmd("-menu") end } )
 		closeBox:SetParent( title )
-		closeBox:SetToolTip( "Close menu." )
 		
 		local positionBox = self:BuildParamPanel( "noconvar", { Type = "panel_sysbutton", Style = "left", DoClick = function ( self ) proxi:SetVar( "menu_position", (proxi:GetVar( "menu_position" ) > 0) and 0 or 1 ) end } )
 		positionBox:SetParent( title )
