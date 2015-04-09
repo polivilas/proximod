@@ -43,7 +43,7 @@ function BEACON:DrawUnderCircle( ent )
 	
 	if thisMathPool.ratioClamped < 1 then
 		render.SetBlend( 1 - thisMathPool.ratioClamped ^ 5 )
-		if ValidEntity( ent:GetRagdollEntity() ) then
+		if IsValid( ent:GetRagdollEntity() ) then
 			render.DrawBeam( thisMathPool.posToProj, ent:GetRagdollEntity():GetPos(), 10, 0.2, 0.8, Color( 255, 255, 255, 255 * cfP ) )
 			ent:GetRagdollEntity():DrawModel()
 			

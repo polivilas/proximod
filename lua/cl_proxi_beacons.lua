@@ -30,7 +30,7 @@ end
 function proxi:RemoveAllPhysicalTags()
 	local allEnts = ents.GetAll()
 	for _,ent in pairs( allEnts ) do
-		if ValidEntity( ent ) then
+		if IsValid( ent ) then
 			ent.__proxi_hasTags = nil
 			ent.__proxi_tags = nil
 		end
@@ -59,7 +59,7 @@ function proxi:UpdateBeacons()
 	
 	local i = 1
 	while i <= #PROXI_TaggedEntities do
-		if not ValidEntity( PROXI_TaggedEntities[ i ] ) then
+		if not IsValid( PROXI_TaggedEntities[ i ] ) then
 			table.remove( PROXI_TaggedEntities, i )
 			
 		else
@@ -82,7 +82,7 @@ function proxi:GetTaggedEntities()
 end
 
 function proxi:TagEntity( ent )
-	if not ValidEntity( ent ) then return nil end
+	if not IsValid( ent ) then return nil end
 	if ent.__proxi_hasTags ~= nil then return nil end -- CAN'T DEFINE TAGS ON AN ENTITIES THAT ALREADY HAVE.
 	
 	ent.__proxi_hasTags = false
@@ -128,7 +128,7 @@ end
 
 function proxi:DebugEntOps( sStep, tEnts, viewData )
 	for k,ent in pairs( tEnts ) do
-		if ValidEntity( ent ) then
+		if IsValid( ent ) then
 			for l,tag in pairs( ent.__proxi_tags ) do
 				// should we Run a check on the tag existence ? ?
 				local objBeacon = PROXI_BEACONS[tag]

@@ -283,7 +283,7 @@ function proxi:DoRenderVirtualScene( viewData )
 	
 	---- Background circle
 	surface.SetDrawColor( proxi:GetVarColorVariadic("uidesign_backcolor") )
-	surface.SetTexture( nil )
+	surface.SetTexture( 0/0 )
 	surface.DrawPoly( self:CalcCircle( 36, iWidth / 2, viewData.drawx, viewData.drawy ) )
 	
 	-- Operation : Keep (We don't want any stencil modification to happen after drawing the polygon).
@@ -426,7 +426,7 @@ function proxi:ProjectPosition( tMath, posToProj )
 	
 	tMath.ratioClamped = tMath.ratio > 1 and 1 or tMath.ratio
 	if tMath.ratioClamped == 1 then
-		tMath.relativePos = tMath.relativePos:Normalize() * PROXI_CURRENT_VIEWDATA.baseratio * tMath.distanceToOrigin
+		tMath.relativePos = tMath.relativePos:GetNormalized() * PROXI_CURRENT_VIEWDATA.baseratio * tMath.distanceToOrigin
 		
 	end
 	

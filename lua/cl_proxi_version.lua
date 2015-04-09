@@ -9,7 +9,7 @@
 
 proxi_internal = {}
 
-local MY_VERSION = tonumber(string.Explode( "\n", file.Read("proxi.txt"))[1])
+local MY_VERSION = 0.205
 local ONLINE_VERSION = nil
 local DOWNLOAD_LINK = nil
 local RECEIVED_RESPONSE = false
@@ -50,11 +50,11 @@ function proxi_internal.ReceiveVersion( args, contents , size )
 	end
 	
 	RECEIVED_RESPONSE = true
-	if args and args[1] then args[1]() end
+	--if args and args[1] then args[1]() end
 	
 end
 
 function proxi_internal.QueryVersion( funcCallback )
-	http.Get( "http://proximod.googlecode.com/svn/trunk/data/proxi.txt", "", proxi_internal.ReceiveVersion, funcCallback )
+	http.Fetch( "http://proximod.googlecode.com/svn/trunk/data/proxi.txt",  proxi_internal.ReceiveVersion)
 	
 end

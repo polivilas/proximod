@@ -19,11 +19,11 @@ function proxi:UpdateMenuPosition()
 	local pos = self:GetVar( "menu_position" )
 	if pos > 0 then
 		PROXI_MENU:SetPos( ScrW() - PROXI_MENU:GetWide(), 0 )
-		PROXI_MENU:GetContents()._p_topPanel._p_positionBox:SetType( "left" )
+		--PROXI_MENU:GetContents()._p_topPanel._p_positionBox:SetType( "left" )
 		
 	else
 		PROXI_MENU:SetPos( 0, 0 )
-		PROXI_MENU:GetContents()._p_topPanel._p_positionBox:SetType( "right" )
+		--PROXI_MENU:GetContents()._p_topPanel._p_positionBox:SetType( "right" )
 		
 	end
 	
@@ -85,7 +85,7 @@ function proxi:BuildMenu()
 				local objBeacon = beacons[ sName ]
 				
 				local category = vgui.Create("ProxiCollapsibleCheckbox", refPanel)
-				category:SetExpanded( false )
+				category:SetExpanded( true )
 				category:SetText( objBeacon:GetDisplayName() )
 				category:SetConVar( self:GetVarName( "beacons_enable_" .. sName ) )
 				
@@ -237,16 +237,6 @@ function proxi:BuildHeader( mainPanel, sHeaderName )
 		end
 		subTitle:SetParent( topPanel )
 		
-		local MY_VERSION, ONLINE_VERSION = proxi_internal.GetVersionData()
-		if ((MY_VERSION < ONLINE_VERSION) and proxi_cloud:IsUsingCloud()) then
-			subTitle:SetToolTip( "There is an update ! You're currently using a temporary copy of the new version (You have v" .. tostring( MY_VERSION ) .. " installed)." )
-			subTitle.Think = function (self)
-				local blink = 127 + (math.sin( math.pi * CurTime() * 0.5 ) + 1 ) * 64
-				self:SetColor( Color( 255, 255, 255, blink ) ) // TODO : ?
-				
-			end
-			
-		end
 		
 		local enableBox = self:BuildParamPanel( "core_enable", { Type = "bool_nolabel", Style = "grip" } )
 		enableBox:SetParent( title )
@@ -282,31 +272,6 @@ function proxi:BuildHeader( mainPanel, sHeaderName )
 		positionBox:SetParent( title )
 		positionBox:SetToolTip( "Change menu dock position." )
 		
-		local reloadCloud = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/toybox", DoClick = function() proxi:CallCmd("-menu") proxi:ReloadFromCloud() end } )
-		reloadCloud:SetParent( subTitle )
-		reloadCloud:SetToolTip( "Press to use the latest version from the Cloud." )
-		
-		local reloadLocale = self:BuildParamPanel( "noconvar", { Type = "panel_imagebutton", Material = "gui/silkicons/application_put", DoClick = function() proxi:CallCmd("-menu") proxi:ReloadFromLocale() end } )
-		reloadLocale:SetParent( subTitle )
-		reloadLocale:SetToolTip( "Press to use your Locale installed version." )
-		
-		local loadChangelog = self:BuildParamPanel( "noconvar", { Type = "panel_button", Text = "Changelog", DoClick = function() proxi:CallCmd("call_changelog") end } )
-		loadChangelog:SetParent( subTitle )
-		loadChangelog:SetToolTip( "Press to view the changelog." )
-		
-		if MY_VERSION < ONLINE_VERSION then
-			loadChangelog.PaintOver = function ( self )
-				local blink = (math.sin( math.pi * CurTime() * 0.5 ) + 1 ) * 64
-				surface.SetDrawColor( 255, 255, 255, blink )
-				draw.RoundedBoxEx( 2, 0, 0, self:GetWide(), self:GetTall(), Color( 255, 255, 255, blink ), true, true, true, true  )
-				
-			end
-			loadChangelog:SetToolTip( "There are updates ! You should update your Locale." )
-			
-		else
-			loadChangelog:SetToolTip( "Press to view the changelog." )
-			
-		end
 		
 		
 		topPanel._p_title = title
@@ -335,9 +300,6 @@ function proxi:BuildHeader( mainPanel, sHeaderName )
 		self._p_positionBox:PerformLayout( )
 		self._p_closeBox:PerformLayout( )
 		
-		self._p_reloadCloud:PerformLayout( )
-		self._p_reloadLocale:PerformLayout( )
-		self._p_loadChangelog:PerformLayout( )
 		
 		self._p_title:CenterHorizontal( )
 		self._p_subTitle:CenterHorizontal( )
@@ -361,16 +323,6 @@ function proxi:BuildHeader( mainPanel, sHeaderName )
 		self._p_positionBox:MoveLeftOf( self._p_closeBox, boxSize * 0.1 )
 		
 		local buttonSize = self._p_subTitle:GetTall()
-		self._p_reloadCloud:SetSize( buttonSize * 0.8, buttonSize * 0.8 )
-		self._p_reloadLocale:SetSize( buttonSize * 0.8, buttonSize * 0.8 )
-		self._p_loadChangelog:SizeToContents( )
-		self._p_loadChangelog:SetSize( self._p_loadChangelog:GetWide() + 6, buttonSize * 0.8 )
-		self._p_reloadCloud:CenterVertical( )
-		self._p_reloadLocale:CenterVertical( )
-		self._p_loadChangelog:CenterVertical( )
-		self._p_reloadCloud:AlignRight( boxSize * 0.1 )
-		self._p_reloadLocale:MoveLeftOf( self._p_reloadCloud, boxSize * 0.1 )
-		self._p_loadChangelog:MoveLeftOf( self._p_reloadLocale, boxSize * 0.3 )
 	end
 	
 	return topPanel

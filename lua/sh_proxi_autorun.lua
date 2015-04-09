@@ -17,8 +17,8 @@ end
 
 PROXI_NAME = "Proxi"
 
-PROXI_FORCE_VERSION = false // !!
-PROXI_FORCE_USE_CLOUD = true // !!
+PROXI_FORCE_VERSION = true // !!
+PROXI_FORCE_USE_CLOUD = false // !!
 
 if (CLIENT or SinglePlayer()) then
 	if (proxi and proxi.Unmount) then proxi.Unmount() end
@@ -59,7 +59,7 @@ if (CLIENT or SinglePlayer()) then
 		
 		print(" > " .. PROXI_NAME .. " is in normal mode. Now querying Version.")
 		proxi_internal.QueryVersion( PROXI_CallbackResponse )
-		timer.Simple( 10, PROXI_CheckResponse )
+		timer.Simple( 1, PROXI_CheckResponse )
 	
 	elseif PROXI_FORCE_USE_CLOUD then
 		print(" > " .. PROXI_NAME .. " is in Cloud force mode. Now querying Cloud.")

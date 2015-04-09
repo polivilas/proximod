@@ -42,7 +42,7 @@ function BEACON:DrawUnderCircle( ent )
 	end
 	
 	thisMathPool.tracedata.start = thisMathPool.posToProj
-	thisMathPool.tracedata.endpos = thisMathPool.posToProj + ent:GetVelocity():Normalize() * 1024
+	thisMathPool.tracedata.endpos = thisMathPool.posToProj + ent:GetVelocity():GetNormalized() * 1024
 	thisMathPool.traceres = util.TraceLine( thisMathPool.tracedata )
 	
 	render.SetMaterial( self.myMaterial )
